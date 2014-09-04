@@ -3,11 +3,7 @@
 """
 
 
-import logging
 import os
-
-
-logger = logging.getLogger('templates')
 
 
 class TemplateRenderException(Exception):
@@ -15,14 +11,18 @@ class TemplateRenderException(Exception):
 
 
 class BaseTemplates(object):
-    """Base templates. Other templates should inherit fromt his class.
+    """Base templates. Other templates should inherit from this class.
+
+    Child classes must implement _render_template, not_found_exception and
+    initial setup in the constructor.
 
     template_directory: absolute path to the directory with the template files.
     base_template_name: name of the template which is used if the more specific
                         template does not exis. See _template_name_generator.
     """
 
-    template_not_found_exception = None
+    # Exception which rises if the rendered template does not exist.
+    not_found_exception = None
 
     def __init__(self, template_directory, base_template_name='_base.html'):
         self.template_directory = template_directory
@@ -61,9 +61,9 @@ class BaseTemplates(object):
         for path in self._template_name_generator(subdirectory, name):
             try:
                 return self._render_template(path, context)
-            except self.template_not_found_exception as e:
-                logger.debug('Could not render %s', path)
-        raise TemplateRenderException('Could not render %s', name)
+            except self.not_found_exception as e:
+                pass
+        raise TemplateRenderException('Could not render %s. No templates.', name)
 
 
 class Jinja2Templates(BaseTemplates):
@@ -74,7 +74,7 @@ class Jinja2Templates(BaseTemplates):
         import jinja2
         loader = jinja2.FileSystemLoader(self.template_directory)
         self.env = jinja2.Environment(loader=loader)
-        self.template_not_found_exception = jinja2.TemplateNotFound
+        self.not_found_exception = jinja2.TemplateNotFound
 
     def _render_template(self, path, context):
         template = self.env.get_template(path)

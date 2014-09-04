@@ -5,13 +5,11 @@ from .builder import Builder
 LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s: %(message)s'
 
 @click.group()
-@click.option('--debug/--no-debug', default=False)
 @click.option('--verbosity', type=click.Choice(['warning', 'info', 'debug']), default='warning')
 @click.pass_context
-def cli(ctx, debug, verbosity):
+def cli(ctx, verbosity):
     numeric_level = getattr(logging, verbosity.upper(), None)
     logging.basicConfig(format=LOG_FORMAT, level=numeric_level)
-    ctx.obj['DEBUG'] = debug
 
 
 @cli.command()
@@ -20,7 +18,6 @@ def cli(ctx, debug, verbosity):
 @click.argument('destination_directory', type=click.Path(resolve_path=True))
 def build(ctx, source_directory, destination_directory):
     """Builds the project."""
-    logging.debug('Debug is %s', ctx.obj['DEBUG'] and 'on' or 'off')
     logging.debug('Source directory is %s', source_directory)
     logging.debug('Destination directory is %s', destination_directory)
 
