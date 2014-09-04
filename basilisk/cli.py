@@ -1,6 +1,6 @@
 import click
 import logging
-from builder import Builder
+from .builder import Builder
 
 LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s: %(message)s'
 
@@ -26,7 +26,3 @@ def build(ctx, source_directory, destination_directory):
 
     builder = Builder(source_directory, destination_directory)
     builder.run()
-
-
-if __name__ == '__main__':
-    cli(obj={})

@@ -4,9 +4,11 @@
 
 
 from collections import defaultdict
+import markdown
 import json
 import os
 import logging
+from .templates import Jinja2Templates
 
 
 logger = logging.getLogger('builder')
@@ -29,7 +31,7 @@ class Config(dict):
 class Build(object):
     """Build.
 
-    directory: relative directory containing that file.
+    subdirectory: relative directory containing that file.
     base_name: base name of the file.
     files: dict with languages as keys and file names as values.
     """
@@ -39,8 +41,47 @@ class Build(object):
         self.base_name = base_name
         self.files = files
 
-    def run(self, config, source_directory, destination_directory):
-        pass
+    def get_content(self, path):
+        with open(path, 'r') as f:
+            return markdown.markdown(f.read())
+
+    def get_lang(self, desired_lang, default_lang):
+        """Returns desired_lang if the file for it exists or falls back to the
+        default language (first language defined in the list of languages to
+        render.
+        """
+        if desired_lang in self.files:
+            return desired_lang
+
+        if default_lang in self.files:
+            logger.warning('No %s language file for %s. Rendering %s.' % (
+                            desired_lang, self.base_name, desired_lang))
+            return default_lang
+
+        raise Exception('No file for %s or default %s.' % (desired_lang, default_lang))
+
+    def get_destination_path(self, destination_directory, lang):
+        return os.path.join(destination_directory, lang, self.subdirectory,
+                            self.base_name, 'index.html')
+
+    def run(self, config, templates, source_directory, destination_directory):
+        for lang in config['languages']:
+            logger.info('Render %s (%s)' % (self.base_name, lang))
+
+            source_lang = self.get_lang(lang, config['languages'][0])
+            source_file = os.path.join(source_directory, self.subdirectory,
+                                       self.files[source_lang])
+            content = self.get_content(source_file)
+            content = templates.render(self.subdirectory, self.base_name, {'content': content})
+
+            path = self.get_destination_path(destination_directory, lang)
+            logger.debug('Saving to path %s', path)
+
+            if not os.path.exists(os.path.dirname(path)):
+                os.makedirs(os.path.dirname(path))
+
+            with open(path, 'w') as f:
+                f.write(content)
 
 
 class Builder(object):
@@ -73,13 +114,18 @@ class Builder(object):
     """
 
     supported_extensions = ['.md', '.html']
+    templates_class = Jinja2Templates
 
     def __init__(self, source_directory, destination_directory):
         self.source_directory = source_directory
         self.destination_directory = destination_directory
-        self.load_config()
+        self.init_config()
 
-    def load_config(self):
+        # Templates.
+        templates_directory = os.path.join(source_directory, '_templates')
+        self.templates = self.templates_class(templates_directory)
+
+    def init_config(self):
         self.config = Config()
         self.config.from_json_file(os.path.join(self.source_directory, '_config.json'))
         logger.debug('Config is %s', self.config)
@@ -102,8 +148,9 @@ class Builder(object):
         root_name, extension = os.path.splitext(path)
         if not extension in self.supported_extensions:
             return False
-        if path.startswith('_'):
-            return False
+        for part in root_name.split(os.pathsep):
+            if part.startswith('_'):
+                return False
         return True
 
     def get_files_to_build(self, subdirectory, filenames):
@@ -141,3 +188,5 @@ class Builder(object):
         for build in self.builds_generator():
             logger.debug('Received Build object: subdirectory %s, base_name %s, files %s',
                          build.subdirectory, build.base_name, build.files)
+            build.run(self.config, self.templates, self.source_directory,
+                      self.destination_directory)
