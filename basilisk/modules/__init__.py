@@ -8,8 +8,11 @@ class Module(object):
 
     def __init__(self, config):
         self.config = config
-        self.logger_name = 'module %s' % self.__class__.name
+        self.logger_name = 'module %s' % self.__class__.__name__
         self._logger = None
+
+    def __str__(self):
+        return self.__class__.__name__
 
     @property
     def logger(self):
@@ -18,7 +21,7 @@ class Module(object):
         """
         if not self._logger:
             import logging
-            self._logger = logging.getLogger(self.__class__.name)
+            self._logger = logging.getLogger(self.logger_name)
         return self._logger
 
     def interested_in(self, path):
@@ -44,3 +47,6 @@ class Module(object):
         environment: Environment object.
         """
         pass
+
+from .html import HtmlModule
+html = HtmlModule

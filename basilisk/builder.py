@@ -9,7 +9,7 @@ import os
 import logging
 from .config import Config
 from .environment import Environment, Build
-from .helpers import replace_ext
+from .helpers import replace_ext, import_by_name
 from .templates import Jinja2Templates
 
 
@@ -44,6 +44,7 @@ class Builder(object):
 
     default_config = {
         'url_prefix': '/',
+        'modules': ['html'],
     }
 
     def __init__(self, source_directory, output_directory):
@@ -51,12 +52,15 @@ class Builder(object):
         self.output_directory = output_directory
         self.config = self.init_config()
         self.templates = self.init_templates()
-        self.modules = []
+        self.modules = self.init_modules()
 
     def init_config(self):
         config_path = os.path.join(self.source_directory, '_config.json')
         config = self.config_class(self.default_config)
-        config.from_json_file(config_path)
+        try:
+            config.from_json_file(config_path)
+        except FileNotFoundError:
+            logger.warning('Project does not contain _config.py file')
         logger.debug('Config is %s, %s', type(config), str(config))
         return config
 
@@ -65,6 +69,18 @@ class Builder(object):
         templates = self.templates_class(templates_directory)
         logger.debug('Templates are %s', type(templates))
         return templates
+
+    def init_modules(self):
+        modules = []
+        for module_name in self.config['modules']:
+            try:
+                import_name = 'basilisk.modules.' + module_name
+                module_class = import_by_name(import_name)
+            except:
+                raise
+            module = module_class(self.config)
+            modules.append(module)
+        return modules
 
     def iter_modules(self):
         return iter(sorted(self.modules, key=lambda x: x.priority))
@@ -116,8 +132,10 @@ class Builder(object):
         logger.debug('Created initial environments: %s', environments)
 
         for module in self.iter_modules():
+            logger.info('Preprocessing with %s', module)
             environments = module.preprocess(environments)
 
         for module in self.iter_modules():
+            logger.info('Running %s', module)
             for environment in environments:
-                module.execute(environment)
+                module.run(environment)
