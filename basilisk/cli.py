@@ -2,7 +2,10 @@ import click
 import logging
 from .builder import Builder
 
+
 LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s: %(message)s'
+logger = logging.getLogger('cli')
+
 
 @click.group()
 @click.option('--verbosity', type=click.Choice(['warning', 'info', 'debug']), default='warning')
@@ -18,8 +21,8 @@ def cli(ctx, verbosity):
 @click.argument('destination_directory', type=click.Path(resolve_path=True))
 def build(ctx, source_directory, destination_directory):
     """Builds the project."""
-    logging.debug('Source directory is %s', source_directory)
-    logging.debug('Destination directory is %s', destination_directory)
+    logger.debug('Source directory is %s', source_directory)
+    logger.debug('Destination directory is %s', destination_directory)
 
     builder = Builder(source_directory, destination_directory)
     builder.run()

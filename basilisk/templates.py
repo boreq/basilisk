@@ -46,7 +46,7 @@ class BaseTemplates(object):
         """This method should render the template with provided context.
 
         path: relative path to the template.
-        context: dictionary which should be used as context while rendering 
+        context: dictionary which should be used as context while rendering
                  the template.
         """
         raise NotImplemented()
