@@ -14,8 +14,10 @@ class Environment(object):
     builds: list of Build objects.
     """
 
-    def __init__(self, source_directory, destination_directory, config=None,
+    def __init__(self, source_directory, output_directory, config=None,
                  builds=None):
+        self.source_directory = source_directory
+        self.output_directory = output_directory
         self.config = copy.deepcopy(config) or Config()
         self.builds = copy.deepcopy(builds) or []
 
@@ -24,7 +26,7 @@ class Build(object):
     """Build object.
 
     input_path: path to the input file relative to the source directory.
-    output_path: path to the output file relative to the destination directory.
+    output_path: path to the output file relative to the output directory.
     """
 
     def __init__(self, input_path, output_path):

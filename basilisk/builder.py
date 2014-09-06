@@ -36,7 +36,7 @@ class Builder(object):
         page.pl.md
 
     source_directory: root directory of the project to build.
-    destination_directory: output directory.
+    output_directory: output directory.
     """
 
     templates_class = Jinja2Templates
@@ -46,9 +46,9 @@ class Builder(object):
         'url_prefix': '/',
     }
 
-    def __init__(self, source_directory, destination_directory):
+    def __init__(self, source_directory, output_directory):
         self.source_directory = source_directory
-        self.destination_directory = destination_directory
+        self.output_directory = output_directory
         self.config = self.init_config()
         self.templates = self.init_templates()
         self.modules = []
@@ -66,16 +66,25 @@ class Builder(object):
         logger.debug('Templates are %s', type(templates))
         return templates
 
+    def iter_modules(self):
+        return iter(sorted(self.modules, key=lambda x: x.priority))
+
     def should_build(self, path):
-        """Decides if the file should be built.
+        """Decides if a Build using this path as an input should be created.
 
         path: Path to the file relative to the source directory root.
         """
-        root_name, extension = os.path.splitext(path)
-        for part in root_name.split(os.pathsep):
+        # Ignore if any part of the path starts with an underscore.
+        for part in path.split(os.pathsep):
             if part.startswith('_'):
                 return False
-        return True
+    
+        # Check if any module wants to preprocess that path.
+        for module in self.iter_modules():
+            if module.interested_in(path):
+                return True
+            
+        return False
 
     def builds_generator(self):
         """Yields Build objects."""
@@ -98,7 +107,7 @@ class Builder(object):
     def create_initial_environments(self):
         """Creates a list containing an intial environment."""
         builds = [build for build in self.builds_generator()]
-        environment = Environment(self.source_directory, self.destination_directory,
+        environment = Environment(self.source_directory, self.output_directory,
                                   config=self.config, builds=builds)
         return [environment]
 
@@ -106,9 +115,9 @@ class Builder(object):
         environments = self.create_initial_environments()
         logger.debug('Created initial environments: %s', environments)
 
-        for module in self.modules:
+        for module in self.iter_modules():
             environments = module.preprocess(environments)
 
-        for module in self.modules:
+        for module in self.iter_modules():
             for environment in environments:
                 module.execute(environment)
