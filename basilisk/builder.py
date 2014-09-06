@@ -50,6 +50,19 @@ class Builder(object):
     def __init__(self, source_directory, output_directory):
         self.source_directory = source_directory
         self.output_directory = output_directory
+
+        if not os.path.isdir(source_directory):
+            msg = 'Source directory does not exist.'
+            logger.critical(msg)
+            raise ValueError(msg)
+
+        if os.path.exists(source_directory):
+            logger.warning('Output directory already exists.')
+            if os.listdir(source_directory):
+                msg = 'Output directory is not empty.'
+                logger.critical(msg)
+                raise ValueError(msg)
+
         self.config = self.init_config()
         self.templates = self.init_templates()
         self.modules = self.init_modules()
@@ -94,12 +107,12 @@ class Builder(object):
         for part in path.split(os.pathsep):
             if part.startswith('_'):
                 return False
-    
+
         # Check if any module wants to preprocess that path.
         for module in self.iter_modules():
             if module.interested_in(path):
                 return True
-            
+
         return False
 
     def builds_generator(self):
@@ -124,7 +137,8 @@ class Builder(object):
         """Creates a list containing an intial environment."""
         builds = [build for build in self.builds_generator()]
         environment = Environment(self.source_directory, self.output_directory,
-                                  config=self.config, builds=builds)
+                                  self.templates, config=self.config,
+                                  builds=builds)
         return [environment]
 
     def run(self):

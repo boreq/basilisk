@@ -14,10 +14,11 @@ class Environment(object):
     builds: list of Build objects.
     """
 
-    def __init__(self, source_directory, output_directory, config=None,
-                 builds=None):
+    def __init__(self, source_directory, output_directory, templates,
+                 config=None, builds=None):
         self.source_directory = source_directory
         self.output_directory = output_directory
+        self.templates = templates
         self.config = copy.deepcopy(config) or Config()
         self.builds = copy.deepcopy(builds) or []
 

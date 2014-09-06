@@ -13,6 +13,8 @@ logger = logging.getLogger('cli')
 @click.option('--verbosity', type=click.Choice(['warning', 'info', 'debug']), default='info')
 @click.pass_context
 def cli(ctx, debug, verbosity):
+    ctx.obj['DEBUG'] = debug
+
     numeric_level = getattr(logging, verbosity.upper(), None)
     if debug:
         log_format = DEBUG_LOG_FORMAT
@@ -23,12 +25,16 @@ def cli(ctx, debug, verbosity):
 
 @cli.command()
 @click.pass_context
-@click.argument('source_directory', type=click.Path(exists=True, resolve_path=True))
-@click.argument('destination_directory', type=click.Path(resolve_path=True))
-def build(ctx, source_directory, destination_directory):
+@click.argument('source_directory', type=click.Path(exists=False, resolve_path=True))
+@click.argument('output_directory', type=click.Path(resolve_path=True))
+def build(ctx, source_directory, output_directory):
     """Builds the project."""
     logger.debug('Source directory is %s', source_directory)
-    logger.debug('Destination directory is %s', destination_directory)
+    logger.debug('Output directory is %s', output_directory)
 
-    builder = Builder(source_directory, destination_directory)
-    builder.run()
+    try:
+        builder = Builder(source_directory, output_directory)
+        builder.run()
+    except:
+        if ctx.obj['DEBUG']:
+            raise
