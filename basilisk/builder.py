@@ -4,12 +4,12 @@
 
 
 from collections import defaultdict
+import logging
 import markdown
 import os
-import logging
 from .config import Config
 from .environment import Environment, Build
-from .helpers import replace_ext, import_by_name
+from .helpers import replace_ext, import_by_name, remove_directory_contents
 from .templates import Jinja2Templates
 
 
@@ -17,23 +17,12 @@ logger = logging.getLogger('builder')
 
 
 class Builder(object):
-    """Main builder.
+    """Main class which coordinates everything.
 
-    Example structure of the source directory:
+    Usage:
 
-        _templates/
-            _base.html    # Default template. Content is added as content variable.
-            _article.html
-        _static/          # Static files.
-        _config.json
-        directory/
-            page.en.md
-        2014/
-            7/
-                13/
-                    article.en.md
-        page.en.md
-        page.pl.md
+        builder = Builder(source_directory, output_directory)
+        builder.run()
 
     source_directory: root directory of the project to build.
     output_directory: output directory.
@@ -56,12 +45,16 @@ class Builder(object):
             logger.critical(msg)
             raise ValueError(msg)
 
-        if os.path.exists(source_directory):
+        if os.path.exists(output_directory):
             logger.warning('Output directory already exists.')
-            if os.listdir(source_directory):
+            if os.listdir(output_directory):
                 msg = 'Output directory is not empty.'
-                logger.critical(msg)
-                raise ValueError(msg)
+                logger.error(msg)
+                purge = input('Remove directory contents? y/N ')
+                if purge.lower() in ['y', 'yes']:
+                    remove_directory_contents(output_directory)
+                else:
+                    raise ValueError(msg)
 
         self.config = self.init_config()
         self.templates = self.init_templates()
