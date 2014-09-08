@@ -35,6 +35,7 @@ def build(ctx, source_directory, output_directory):
     try:
         builder = Builder(source_directory, output_directory)
         builder.run()
-    except:
+    except Exception as e:
+        logger.critical(e)
         if ctx.obj['DEBUG']:
             raise

@@ -9,6 +9,7 @@ import markdown
 import os
 from .config import Config
 from .environment import Environment, Build
+from .exceptions import BuildException
 from .helpers import replace_ext, import_by_name, remove_directory_contents
 from .templates import Jinja2Templates
 
@@ -33,32 +34,35 @@ class Builder(object):
 
     default_config = {
         'url_prefix': '/',
-        'modules': ['html'],
+        'modules': ['pretty_urls', 'html'],
     }
 
     def __init__(self, source_directory, output_directory):
         self.source_directory = source_directory
         self.output_directory = output_directory
-
-        if not os.path.isdir(source_directory):
-            msg = 'Source directory does not exist.'
-            logger.critical(msg)
-            raise ValueError(msg)
-
-        if os.path.exists(output_directory):
-            logger.warning('Output directory already exists.')
-            if os.listdir(output_directory):
-                msg = 'Output directory is not empty.'
-                logger.error(msg)
-                purge = input('Remove directory contents? y/N ')
-                if purge.lower() in ['y', 'yes']:
-                    remove_directory_contents(output_directory)
-                else:
-                    raise ValueError(msg)
+        self.test_directories()
 
         self.config = self.init_config()
         self.templates = self.init_templates()
         self.modules = self.init_modules()
+
+        logger.debug('Config is %s', self.config)
+        logger.debug('Templates are %s', self.templates)
+
+    def test_directories(self):
+        if not os.path.isdir(self.source_directory):
+            raise BuildException('Source directory does not exist.')
+
+        if os.path.exists(self.output_directory):
+            logger.warning('Output directory already exists.')
+            if os.listdir(self.output_directory):
+                msg = 'Output directory is not empty.'
+                logger.error(msg)
+                purge = input('Remove directory contents? y/N ')
+                if purge.lower() in ['y', 'yes']:
+                    remove_directory_contents(self.output_directory)
+                else:
+                    raise BuildException(msg)
 
     def init_config(self):
         config_path = os.path.join(self.source_directory, '_config.json')
@@ -67,13 +71,11 @@ class Builder(object):
             config.from_json_file(config_path)
         except FileNotFoundError:
             logger.warning('Project does not contain _config.py file')
-        logger.debug('Config is %s, %s', type(config), str(config))
         return config
 
     def init_templates(self):
         templates_directory = os.path.join(self.source_directory, '_templates')
         templates = self.templates_class(templates_directory)
-        logger.debug('Templates are %s', type(templates))
         return templates
 
     def init_modules(self):
@@ -84,8 +86,9 @@ class Builder(object):
                 module_class = import_by_name(import_name)
             except:
                 raise
-            module = module_class(self.config)
+            module = module_class()
             modules.append(module)
+            logger.debug('Loaded module %s', module)
         return modules
 
     def iter_modules(self):
@@ -109,13 +112,11 @@ class Builder(object):
         return False
 
     def builds_generator(self):
-        """Yields Build objects."""
+        """Yields Build objects used to create initial Environment object."""
         base_path_length = len(self.source_directory) + 1
 
         for (dirpath, dirnames, filenames) in os.walk(self.source_directory):
-            logger.debug('Directory %s: %s, %s', dirpath, dirnames, filenames)
             subdirectory = dirpath[base_path_length:]
-
             for filename in filenames:
                 input_path = os.path.join(subdirectory, filename)
                 if not self.should_build(input_path):
@@ -127,10 +128,10 @@ class Builder(object):
                 yield build
 
     def create_initial_environments(self):
-        """Creates a list containing an intial environment."""
+        """Creates a list containing an intial Environment object."""
         builds = [build for build in self.builds_generator()]
         environment = Environment(self.source_directory, self.output_directory,
-                                  self.templates, config=self.config,
+                                  templates=self.templates, config=self.config,
                                   builds=builds)
         return [environment]
 

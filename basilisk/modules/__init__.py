@@ -6,8 +6,7 @@ class Module(object):
     # it depends.
     priority = 0
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
         self.logger_name = 'module %s' % self.__class__.__name__
         self._logger = None
 
@@ -49,4 +48,6 @@ class Module(object):
         pass
 
 from .html import HtmlModule
+from .pretty_urls import PrettyUrlsModule
 html = HtmlModule
+pretty_urls = PrettyUrlsModule
