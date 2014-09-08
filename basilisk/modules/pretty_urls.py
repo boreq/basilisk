@@ -25,6 +25,6 @@ class PrettyUrlsModule(Module):
                 head, tail = os.path.split(build.output_path)
                 base_name, ext = os.path.splitext(tail)
                 if base_name != 'index':
-                    self.logger.debug('Changing output of %s', build.output_path)
+                    self.logger.debug('Changing output of %s', build)
                     build.output_path = os.path.join(head, base_name, 'index' + ext)
         return environment_list

@@ -46,9 +46,6 @@ class Builder(object):
         self.templates = self.init_templates()
         self.modules = self.init_modules()
 
-        logger.debug('Config is %s', self.config)
-        logger.debug('Templates are %s', self.templates)
-
     def test_directories(self):
         if not os.path.isdir(self.source_directory):
             raise BuildException('Source directory does not exist.')
@@ -70,7 +67,7 @@ class Builder(object):
         try:
             config.from_json_file(config_path)
         except FileNotFoundError:
-            logger.warning('Project does not contain _config.py file')
+            logger.warning('Project does not contain the config file.')
         return config
 
     def init_templates(self):
