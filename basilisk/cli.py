@@ -10,17 +10,12 @@ logger = logging.getLogger('cli')
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
-@click.option('--verbosity', type=click.Choice(['warning', 'info', 'debug']), default='info')
 @click.pass_context
 def cli(ctx, debug, verbosity):
     ctx.obj['DEBUG'] = debug
-
-    numeric_level = getattr(logging, verbosity.upper(), None)
-    if debug:
-        log_format = DEBUG_LOG_FORMAT
-    else:
-        log_format = LOG_FORMAT
-    logging.basicConfig(format=log_format, level=numeric_level)
+    log_format = (debug and DEBUG_LOG_FORMAT) or LOG_FORMAT
+    log_level = (debug and logging.DEBUG) or logging.INFO
+    logging.basicConfig(format=log_format, level=log_level)
 
 
 @cli.command()
@@ -29,9 +24,6 @@ def cli(ctx, debug, verbosity):
 @click.argument('output_directory', type=click.Path(resolve_path=True))
 def build(ctx, source_directory, output_directory):
     """Builds the project."""
-    logger.debug('Source directory is %s', source_directory)
-    logger.debug('Output directory is %s', output_directory)
-
     try:
         builder = Builder(source_directory, output_directory)
         builder.run()

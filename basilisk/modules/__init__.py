@@ -1,12 +1,16 @@
-class Module(object):
-    """All functionality is implemented by modules. Modules operate on the
+"""
+    All functionality is implemented by modules. Modules operate on the
     environment objects. Original list containing one initial environment object
     is created in the builder. After that `Module.preprocess()` method of all
     modules is called on that list. Modules can modify the existing environment
     or create new ones. After all modules preprocess the list `Module.execute()`
     method of each module is called on all environments stored in that list.
     See Builder.run() for more information.
-    """
+"""
+
+
+class Module(object):
+    """Base module class."""
 
     # Modules with lower priority are executed earlier. By assigning a higher
     # value to a module you can execute it after the modules which produce
