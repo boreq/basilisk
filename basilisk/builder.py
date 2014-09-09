@@ -27,31 +27,54 @@ class Builder(object):
 
     source_directory: root directory of the project to build.
     output_directory: output directory.
+    config_file: path to the config file relative to the source directory.
     """
 
+    # Default class used for templates.
     templates_class = Jinja2Templates
+
+    # Default class used for config.
     config_class = Config
 
+    # Default config values.
     default_config = {
-        'url_prefix': '/',
         'modules': ['pretty_urls', 'html'],
+        'ignore_prefix': '_',
+        'templates_directory': '_templates',
     }
 
-    def __init__(self, source_directory, output_directory):
+    def __init__(self, source_directory, output_directory,
+                 config_file='_config.json'):
         self.source_directory = source_directory
         self.output_directory = output_directory
         self.test_directories()
 
-        self.config = self.init_config()
-        self.templates = self.init_templates()
-        self.modules = self.init_modules()
+        # Default filename of the config file. This file will be loaded from the
+        # source directory.
+        self.config_file = config_file
+
+        # Config dictionary.
+        self.config = self.get_config()
+
+        # List of callables which are passed a file path and return True if that
+        # path should be ignored.
+        self.ignored = []
+
+        # List of loaded modules.
+        self.modules = []
+
+        self.init_ignored()
+        self.init_modules()
 
     def test_directories(self):
+        """Performs sanity checks on the source and output directories."""
+        # Check if the source directory exists.
         if not os.path.isdir(self.source_directory):
             raise BuildException('Source directory does not exist.')
 
+        # Check if the output directory is empty and offer to delete its
+        # contents otherwise.
         if os.path.exists(self.output_directory):
-            logger.warning('Output directory already exists.')
             if os.listdir(self.output_directory):
                 msg = 'Output directory is not empty.'
                 logger.error(msg)
@@ -61,8 +84,9 @@ class Builder(object):
                 else:
                     raise BuildException(msg)
 
-    def init_config(self):
-        config_path = os.path.join(self.source_directory, '_config.json')
+    def get_config(self):
+        """Returns Config object."""
+        config_path = os.path.join(self.source_directory, self.config_file)
         config = self.config_class(self.default_config)
         try:
             config.from_json_file(config_path)
@@ -70,25 +94,58 @@ class Builder(object):
             logger.warning('Project does not contain the config file.')
         return config
 
-    def init_templates(self):
-        templates_directory = os.path.join(self.source_directory, '_templates')
-        templates = self.templates_class(templates_directory)
-        return templates
-
     def init_modules(self):
-        modules = []
+        """Initializes all modules defined in the config."""
         for module_name in self.config['modules']:
             try:
                 import_name = 'basilisk.modules.' + module_name
                 module_class = import_by_name(import_name)
             except:
+                # TODO: try load an external module.
                 raise
-            module = module_class()
-            modules.append(module)
-            logger.debug('Loaded module %s', module)
-        return modules
+            self.load_module(module_class())
+
+    def init_ignored(self):
+        """Adds callables used to detect files which should be ignored and not
+        added to the initial environment.
+        """
+        # Ignore templates directory.
+        def ignore_templates(path):
+            if os.path.commonprefix([self.config['templates_directory'], path]):
+                return True
+
+        # Ignore templates directory.
+        def ignore_config(path):
+            if os.path.commonprefix([self.config_file, path]):
+                return True
+
+        # Ignore if any part of the path starts with an underscore.
+        def ignore_prefixed(path):
+            for part in path.split(os.pathsep):
+                if part.startswith('_'):
+                    return True
+
+        self.ignored.append(ignore_templates)
+        self.ignored.append(ignore_config)
+        self.ignored.append(ignore_prefixed)
+
+    def load_module(self, module):
+        """Loads a single module.
+
+        module: a class which inherits from Module.
+        """
+        module.load(self)
+        self.modules.append(module)
+
+    def get_templates(self):
+        """Returns templates passed to the initial environment."""
+        templates_directory = os.path.join(self.source_directory,
+                                           self.config['templates_directory'])
+        templates = self.templates_class(templates_directory)
+        return templates
 
     def iter_modules(self):
+        """Iterates over loaded modules sorted by priority."""
         return iter(sorted(self.modules, key=lambda x: x.priority))
 
     def should_build(self, path):
@@ -96,17 +153,10 @@ class Builder(object):
 
         path: Path to the file relative to the source directory root.
         """
-        # Ignore if any part of the path starts with an underscore.
-        for part in path.split(os.pathsep):
-            if part.startswith('_'):
+        for method in self.ignored:
+            if method(path):
                 return False
-
-        # Check if any module wants to preprocess that path.
-        for module in self.iter_modules():
-            if module.interested_in(path):
-                return True
-
-        return False
+        return True
 
     def builds_generator(self):
         """Yields Build objects used to create initial Environment object."""
@@ -125,16 +175,15 @@ class Builder(object):
                 yield build
 
     def create_initial_environments(self):
-        """Creates a list containing an intial Environment object."""
+        """Creates a list containing an intial environment."""
         builds = [build for build in self.builds_generator()]
         environment = Environment(self.source_directory, self.output_directory,
-                                  templates=self.templates, config=self.config,
-                                  builds=builds)
+                                  templates=self.get_templates(),
+                                  config=self.config, builds=builds)
         return [environment]
 
     def run(self):
         environments = self.create_initial_environments()
-        logger.debug('Created initial environments: %s', environments)
 
         for module in self.iter_modules():
             logger.info('Preprocessing with %s', module)
@@ -143,4 +192,4 @@ class Builder(object):
         for module in self.iter_modules():
             logger.info('Running %s', module)
             for environment in environments:
-                module.run(environment)
+                module. execute(environment)

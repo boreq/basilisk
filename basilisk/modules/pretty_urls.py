@@ -3,8 +3,8 @@ from . import Module
 
 
 class PrettyUrlsModule(Module):
-    """Makes the urls "pretty" by moving all outputs with file not called
-    `index` into a subdirectory. For example output called `directory/page.html`
+    """Makes the urls "pretty" by moving all outputs not called `index.html`
+    into a subdirectory. For example output called `directory/page.html`
     will be changed to `directory/page/index.html`. That way it will be possible
     to access it simply using `directory/page/`. All `index.html` files are
     unaffected. Watch out for conflicts in situations similar to this one:
