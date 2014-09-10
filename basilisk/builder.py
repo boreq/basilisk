@@ -18,7 +18,9 @@ logger = logging.getLogger('builder')
 
 
 class Builder(object):
-    """Main class which coordinates everything.
+    """Main class which coordinates everything. This class loads the config and
+    modules, scans the source directory to find the files which should be
+    converted and , 
 
     Usage:
 
@@ -27,10 +29,11 @@ class Builder(object):
 
     source_directory: root directory of the project to build.
     output_directory: output directory.
-    config_file: path to the config file relative to the source directory.
+    config_file: path to the config file relative to the source directory root.
     """
 
-    # Default class used for templates.
+    # Default class used for templates. Instance of this class is passed to the
+    # initial environment.
     templates_class = Jinja2Templates
 
     # Default class used for config.
@@ -38,8 +41,11 @@ class Builder(object):
 
     # Default config values.
     default_config = {
+        # Modules to load.
         'modules': ['pretty_urls', 'html'],
+        # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
+        # Directory containing templates.
         'templates_directory': '_templates',
     }
 
@@ -113,26 +119,25 @@ class Builder(object):
         def ignore_templates(path):
             if os.path.commonprefix([self.config['templates_directory'], path]):
                 return True
+        self.ignored.append(ignore_templates)
 
-        # Ignore templates directory.
+        # Ignore config file.
         def ignore_config(path):
             if os.path.commonprefix([self.config_file, path]):
                 return True
+        self.ignored.append(ignore_config)
 
         # Ignore if any part of the path starts with an underscore.
         def ignore_prefixed(path):
             for part in path.split(os.pathsep):
-                if part.startswith('_'):
+                if part.startswith(self.config['ignore_prefix']):
                     return True
-
-        self.ignored.append(ignore_templates)
-        self.ignored.append(ignore_config)
         self.ignored.append(ignore_prefixed)
 
     def load_module(self, module):
         """Loads a single module.
 
-        module: a class which inherits from Module.
+        module: a class instance which inherits from Module.
         """
         module.load(self)
         self.modules.append(module)

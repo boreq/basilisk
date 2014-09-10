@@ -11,7 +11,7 @@ logger = logging.getLogger('cli')
 @click.group()
 @click.option('--debug/--no-debug', default=False)
 @click.pass_context
-def cli(ctx, debug, verbosity):
+def cli(ctx, debug):
     ctx.obj['DEBUG'] = debug
     log_format = (debug and DEBUG_LOG_FORMAT) or LOG_FORMAT
     log_level = (debug and logging.DEBUG) or logging.INFO
