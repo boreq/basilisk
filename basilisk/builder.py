@@ -17,7 +17,7 @@ from .templates import Jinja2Templates
 logger = logging.getLogger('builder')
 
 
-class builder(object):
+class Builder(object):
     """Main class which basically coordinates everything else. This class loads
     the config and modules, scans the source directory to find the files which
     should be converted and creates the initial environment. The list containing
@@ -45,7 +45,7 @@ class builder(object):
     # Default config values.
     default_config = {
         # Modules to load.
-        'modules': ['pretty_urls', 'html'],
+        'modules': ['pretty_urls', 'html', 'i18n'],
         # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
         # Directory containing templates.

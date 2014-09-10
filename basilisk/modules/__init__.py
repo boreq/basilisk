@@ -6,6 +6,11 @@
     or create new ones. After all modules preprocess the list `Module.execute()`
     method of each module is called on all environments stored in that list.
     See Builder.run() for more information.
+
+    Modules can access builder through the `Module.load()` method. That way it
+    is possible for example to access the global config file. Module-specific
+    config keys should be prefixed with the module name, for example
+    `i18n_languages`, in order to prevent config key collisions.
 """
 
 
@@ -60,3 +65,6 @@ html = HtmlModule
 
 from .pretty_urls import PrettyUrlsModule
 pretty_urls = PrettyUrlsModule
+
+from .i18n import InternationalizationModule
+i18n = InternationalizationModule

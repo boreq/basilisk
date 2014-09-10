@@ -1,24 +1,21 @@
-"""
-    Template systems.
-"""
-
-
 import os
 from .exceptions import TemplateRenderException
 
 
 class BaseTemplates(object):
-    """Base templates. Other templates should inherit from this class.
-
-    Child classes must implement _render_template, not_found_exception and
+    """Base templates. Other templates should inherit from this class. Child
+    classes must implement _render_template, not_found_exception and
     initial setup in the constructor.
 
     template_directory: absolute path to the directory with the template files.
     base_template_name: name of the template which is used if the more specific
                         template does not exis. See _template_name_generator.
+                        It might be a good idea to prefix this name with
+                        a rarely used character in order to avoid conflicts
+                        with templates for specific pages.
     """
 
-    # Exception which rises if the rendered template does not exist.
+    # Exception which is rised if the rendered template does not exist.
     not_found_exception = None
 
     def __init__(self, template_directory, base_template_name='_base.html'):
@@ -26,11 +23,13 @@ class BaseTemplates(object):
         self.base_template_name = base_template_name
 
     def _template_name_generator(self, path):
-        """Returns template names in the following order:
+        """For the path `subdirectory/name.ext` and base template name
+        `_base.html` this function would return template names in the following
+        order:
 
             1. subdirectory/name.html
-            2. subdirectory/base_template_name
-            3. base_template_name
+            2. subdirectory/_base.html
+            3. _base.html
 
         path: path of a rendered file relative to the source directory.
         """
@@ -52,7 +51,7 @@ class BaseTemplates(object):
     def render(self, path, context):
         """Called during the build to render templates.
 
-        path: path of a rendered file relative to the source directory.
+        path: path of a source file relative to the source directory.
         context: see _render_template.
         """
         for template_path in self._template_name_generator(path):
@@ -67,12 +66,44 @@ class Jinja2Templates(BaseTemplates):
     """Jinja2 templates."""
 
     def __init__(self, *args, **kwargs):
+        extensions = kwargs.pop('extensions', [])
         super(Jinja2Templates, self).__init__(*args, **kwargs)
         import jinja2
         loader = jinja2.FileSystemLoader(self.template_directory)
-        self.env = jinja2.Environment(loader=loader)
+        self.env = jinja2.Environment(loader=loader, extensions=extensions)
         self.not_found_exception = jinja2.TemplateNotFound
 
     def _render_template(self, path, context):
         template = self.env.get_template(path)
         return template.render(**context)
+
+
+class InternationalizedJinja2Templates(Jinja2Templates):
+    """Jinja2 templates with i18n support."""
+
+    def __init__(self, *args, **kwargs):
+        self.locale = kwargs.pop('locale')
+        self.translations_directory = kwargs.pop('translations_directory')
+        self._locale = None
+        self._translations = None
+        kwargs.setdefault('extensions', [])
+        kwargs['extensions'].append('jinja2.ext.i18n')
+        super(InternationalizedJinja2Templates, self).__init__(*args, **kwargs)
+        self.env.install_gettext_callables(
+             lambda x: self.get_translations().ugettext(x),
+             lambda s, p, n: self.get_translations().ungettext(s, p, n),
+             newstyle=True
+         )
+
+    def get_translations(self):
+        if not self._translations:
+            from babel.support import Translations
+            self._translations = Translations.load(self.translations_directory,
+                                                   self.get_locale())
+        return self._translations
+
+    def get_locale(self):
+        if not self._locale:
+            from babel.core import Locale
+            self._locale = Locale.parse(self.locale)
+        return self._locale
