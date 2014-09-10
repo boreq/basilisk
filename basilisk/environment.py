@@ -5,14 +5,14 @@ from .config import Config
 
 
 class Environment(object):
-    """Holds config and list of builds to be executed. One of those is initially
-    crated by the builder and passed to the modules which can modify it or
-    create additional environments.
+    """Holds a list of builds to be executed and related parameters such as
+    config or templates.
 
-    Passed arguments are deep copied to allow introducing changes independently.
-
+    source_directory: path to the source directory.
+    output_directory: path to the output directory.
+    templates: object which inherits from BaseTemplates.
     config: individual config, can be changed later. In the initial Environment
-            it is a copy of builder config.
+            it is a copy of the builder config.
     builds: list of Build objects.
     """
 
@@ -25,6 +25,11 @@ class Environment(object):
         self.builds = copy.deepcopy(builds) or []
 
     def get_context(self, build):
+        """Get context passed to the templates when renreding a build in this
+        environment.
+
+        build: Build object.
+        """
         content, parameters = build.read(self)
         context = {
             'content': content,

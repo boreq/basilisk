@@ -17,12 +17,15 @@ from .templates import Jinja2Templates
 logger = logging.getLogger('builder')
 
 
-class Builder(object):
-    """Main class which coordinates everything. This class loads the config and
-    modules, scans the source directory to find the files which should be
-    converted and , 
+class builder(object):
+    """Main class which basically coordinates everything else. This class loads
+    the config and modules, scans the source directory to find the files which
+    should be converted and creates the initial environment. The list containing
+    this environment is first passed to all modules for preprocessing and after
+    that each module is executed on the environment objects present in that
+    list.
 
-    Usage:
+    Example usage:
 
         builder = Builder(source_directory, output_directory)
         builder.run()
