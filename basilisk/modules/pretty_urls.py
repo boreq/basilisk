@@ -19,11 +19,15 @@ class PrettyUrlsModule(Module):
 
     priority = -10
 
+    def explode_path(self, path):
+        head, tail = os.path.split(path)
+        base_name, ext = os.path.splitext(tail)
+        return (head, base_name, ext)
+
     def preprocess(self, environment_list):
         for environment in environment_list:
             for build in environment.builds:
-                head, tail = os.path.split(build.output_path)
-                base_name, ext = os.path.splitext(tail)
+                head, base_name, ext = self.explode_path(build.output_path)
                 if base_name != 'index':
                     self.logger.debug('Changing output of %s', build)
                     build.output_path = os.path.join(head, base_name, 'index' + ext)

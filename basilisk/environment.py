@@ -2,6 +2,7 @@ import copy
 import logging
 import os
 from .config import Config
+from .helpers import replace_ext
 
 
 class Environment(object):
@@ -25,7 +26,7 @@ class Environment(object):
         self.builds = copy.deepcopy(builds) or []
 
     def get_context(self, build):
-        """Get context passed to the templates when renreding a build in this
+        """Get context passed to the templates when executing a build in this
         environment.
 
         build: Build object.
@@ -49,13 +50,26 @@ class Build(object):
     def __init__(self, input_path, output_path):
         self.input_path = input_path
         self.output_path = output_path
+        # Path used for selecting the right template. Passed to
+        # BaseTemplates._template_name_generator. Module might overwrite that
+        # value if it requres a source filename in an unusual format. An example
+        # of that is the built in i18n extension which requires locale in the
+        # filename. That normally results in matching the wrong template.
+        base, ext = os.path.splitext(input_path)
+        self.template_path = replace_ext(input_path, ext, '.html')
 
     def __repr__(self):
         return '<%s.%s %s->%s>' % (self.__module__, self.__class__.__name__,
                                    self.input_path, self.output_path)
 
     def read_parameter(self, line):
-        """Reads a single parameter from a line.
+        """Reads a parameter from a line of text. Parameters are structured in
+        the following form and can be defined at the top of the source file:
+
+            parameter_name: value
+
+        Parameters defined like that are passed in the template context as
+        a dictionary called `parameters` with names of the parameters as keys.
 
         line: string.
         """
@@ -86,7 +100,7 @@ class Build(object):
 
     def write(self, environment, content):
         """Writes content to the output file.
-        
+
         environment: Environment object.
         content: This will be written to the output file, most likely a result
                  of template rendering.

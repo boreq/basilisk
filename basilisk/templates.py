@@ -34,7 +34,7 @@ class BaseTemplates(object):
         path: path of a rendered file relative to the source directory.
         """
         head, tail = os.path.split(path)
-        yield os.path.join(head, '%s.html' % tail)
+        yield path
         yield os.path.join(head, self.base_template_name)
         yield self.base_template_name
 

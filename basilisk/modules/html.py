@@ -1,6 +1,4 @@
-import os
 from . import Module
-from ..templates import TemplateRenderException
 
 
 class HtmlModule(Module):
@@ -17,5 +15,5 @@ class HtmlModule(Module):
             if build.input_path.endswith('.html'):
                 self.logger.debug('Building %s', build)
                 context = self.get_context(environment, build)
-                content = environment.templates.render(build.input_path, context)
+                content = environment.templates.render(build.template_path, context)
                 build.write(environment, content)
