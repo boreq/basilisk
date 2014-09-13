@@ -45,7 +45,7 @@ class Builder(object):
     # Default config values.
     default_config = {
         # Modules to load.
-        'modules': ['pretty_urls', 'html', 'i18n'],
+        'modules': ['pretty_urls', 'html'],
         # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
         # Directory containing templates.
@@ -200,4 +200,5 @@ class Builder(object):
         for module in self.iter_modules():
             logger.info('Running %s', module)
             for environment in environments:
-                module. execute(environment)
+                with environment.env_context():
+                    module.execute()

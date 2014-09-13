@@ -2,28 +2,27 @@ import copy
 import logging
 import os
 from .config import Config
+from .context import EnvContext
 from .helpers import replace_ext
 
 
 class Environment(object):
-    """Holds a list of builds to be executed and related parameters such as
-    config or templates.
+    """Holds parameters related to building a list of builds such as config or
+    templates.
 
     source_directory: path to the source directory.
     output_directory: path to the output directory.
     templates: object which inherits from BaseTemplates.
     config: individual config, can be changed later. In the initial Environment
             it is a copy of the builder config.
-    builds: list of Build objects.
     """
 
     def __init__(self, source_directory, output_directory, templates=None,
-                 config=None, builds=None):
+                 config=None):
         self.source_directory = source_directory
         self.output_directory = output_directory
         self.templates = templates
         self.config = copy.deepcopy(config) or Config()
-        self.builds = copy.deepcopy(builds) or []
 
     def get_context(self, build):
         """Get context passed to the templates when executing a build in this
@@ -38,6 +37,9 @@ class Environment(object):
             'config': self.config,
         }
         return context
+
+    def env_context(self):
+        return EnvContext(self)
 
 
 class Build(object):
