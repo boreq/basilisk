@@ -1,11 +1,5 @@
-"""
-    Main class bulding the static website.
-"""
-
-
 from collections import defaultdict
 import logging
-import markdown
 import os
 from .config import Config
 from .environment import Environment, Build
@@ -45,7 +39,7 @@ class Builder(object):
     # Default config values.
     default_config = {
         # Modules to load.
-        'modules': ['pretty_urls', 'html', 'i18n'],
+        'modules': ['pretty_urls', 'html'],
         # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
         # Directory containing templates.
@@ -58,8 +52,8 @@ class Builder(object):
         self.output_directory = output_directory
         self.test_directories()
 
-        # Default filename of the config file. This file will be loaded from the
-        # source directory.
+        # Path to the config file. This file will be loaded from the source
+        # directory.
         self.config_file = config_file
 
         # Config dictionary.
@@ -95,9 +89,9 @@ class Builder(object):
 
     def get_config(self):
         """Returns Config object."""
-        config_path = os.path.join(self.source_directory, self.config_file)
         config = self.config_class(self.default_config)
         try:
+            config_path = os.path.join(self.source_directory, self.config_file)
             config.from_json_file(config_path)
         except FileNotFoundError:
             logger.warning('Project does not contain the config file.')
@@ -130,7 +124,7 @@ class Builder(object):
                 return True
         self.ignored.append(ignore_config)
 
-        # Ignore if any part of the path starts with an underscore.
+        # Ignore if any part of the path starts with ignore prefix.
         def ignore_prefixed(path):
             for part in path.split(os.pathsep):
                 if part.startswith(self.config['ignore_prefix']):
@@ -140,7 +134,7 @@ class Builder(object):
     def load_module(self, module):
         """Loads a single module.
 
-        module: a class instance which inherits from Module.
+        module: an instance of the class which inherits from Module.
         """
         module.load(self)
         self.modules.append(module)
@@ -179,7 +173,6 @@ class Builder(object):
                 ext = os.path.splitext(input_path)[1]
                 output_path = replace_ext(input_path, ext, '.html')
                 build = Build(input_path, output_path)
-                logger.debug('Yielding object: %s', build)
                 yield build
 
     def create_initial_environments(self):
@@ -200,4 +193,4 @@ class Builder(object):
         for module in self.iter_modules():
             logger.info('Running %s', module)
             for environment in environments:
-                module. execute(environment)
+                module.execute(environment)
