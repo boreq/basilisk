@@ -1,7 +1,7 @@
 import copy
 import os
 from . import Module
-from ..templates import InternationalizedJinja2Templates
+#from ..templates import InternationalizedJinja2Templates
 
 
 class InternationalizationModule(Module):

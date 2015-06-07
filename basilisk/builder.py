@@ -1,29 +1,20 @@
-"""
-    Main class bulding the static website.
-"""
-
-
 from collections import defaultdict
 import logging
-import markdown
 import os
+from .build import Build
 from .config import Config
-from .environment import Environment, Build
 from .exceptions import BuildException
 from .helpers import replace_ext, import_by_name, remove_directory_contents
-from .templates import Jinja2Templates
 
 
 logger = logging.getLogger('builder')
 
 
 class Builder(object):
-    """Main class which basically coordinates everything else. This class loads
-    the config and modules, scans the source directory to find the files which
-    should be converted and creates the initial environment. The list containing
-    this environment is first passed to all modules for preprocessing and after
-    that each module is executed on the environment objects present in that
-    list.
+    """This class loads the config and modules, scans the source directory to
+    find the files which should be converted and creates the initial list of
+    builds. This list is first passed to all modules for preprocessing and after
+    that each build is executed.
 
     Example usage:
 
@@ -35,10 +26,6 @@ class Builder(object):
     config_file: path to the config file relative to the source directory root.
     """
 
-    # Default class used for templates. Instance of this class is passed to the
-    # initial environment.
-    templates_class = Jinja2Templates
-
     # Default class used for config.
     config_class = Config
 
@@ -48,8 +35,6 @@ class Builder(object):
         'modules': ['pretty_urls', 'html'],
         # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
-        # Directory containing templates.
-        'templates_directory': '_templates',
     }
 
     def __init__(self, source_directory, output_directory,
@@ -118,12 +103,6 @@ class Builder(object):
         """Adds callables used to detect files which should be ignored and not
         added to the initial environment.
         """
-        # Ignore templates directory.
-        def ignore_templates(path):
-            if os.path.commonprefix([self.config['templates_directory'], path]):
-                return True
-        self.ignored.append(ignore_templates)
-
         # Ignore config file.
         def ignore_config(path):
             if os.path.commonprefix([self.config_file, path]):
@@ -144,13 +123,6 @@ class Builder(object):
         """
         module.load(self)
         self.modules.append(module)
-
-    def get_templates(self):
-        """Returns templates passed to the initial environment."""
-        templates_directory = os.path.join(self.source_directory,
-                                           self.config['templates_directory'])
-        templates = self.templates_class(templates_directory)
-        return templates
 
     def iter_modules(self):
         """Iterates over loaded modules sorted by priority."""
@@ -182,23 +154,13 @@ class Builder(object):
                 logger.debug('Yielding object: %s', build)
                 yield build
 
-    def create_initial_environments(self):
-        """Creates a list containing an intial environment."""
-        builds = [build for build in self.builds_generator()]
-        environment = Environment(self.source_directory, self.output_directory,
-                                  templates=self.get_templates(),
-                                  config=self.config, builds=builds)
-        return [environment]
-
     def run(self):
-        environments = self.create_initial_environments()
-
-        for module in self.iter_modules():
-            logger.info('Preprocessing with %s', module)
-            environments = module.preprocess(environments)
+        builds = [build for build in self.builds_generator()]
 
         for module in self.iter_modules():
             logger.info('Running %s', module)
-            for environment in environments:
-                with environment.env_context():
-                    module.execute()
+            module.execute(builds)
+
+        for build in builds:
+            logger.info('Building %s', build)
+            build.execute(self.source_directory, self.output_directory)
