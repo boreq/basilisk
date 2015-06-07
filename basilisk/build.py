@@ -18,9 +18,12 @@ class Build(object):
         # str process(str content, dict parameters)
         self.processors = []
 
+    def __str__(self):
+        return '%s->%s' % (self.input_path, self.output_path)
+
     def __repr__(self):
-        return '<%s.%s %s->%s>' % (self.__module__, self.__class__.__name__,
-                                   self.input_path, self.output_path)
+        return '<%s.%s %s>' % (self.__module__, self.__class__.__name__,
+                                  self__str__())
 
     def read_parameter(self, line):
         """Reads a parameter from a line of text. Parameters are structured in
