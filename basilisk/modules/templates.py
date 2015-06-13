@@ -8,17 +8,13 @@ class TemplatesModule(Module):
     unchanged.
     """
 
-    def get_context(self, environment, build):
-        """Gets the context which is passed to the renered template."""
-        return environment.get_context(build)
-
     def make_processor(self, templates, input_path):
-        def processor(content, parameters):
-            context = {
+        def processor(content, context):
+            template_context = {
                 'content': content,
-                'parameters': parameters
             }
-            return templates.render(input_path, context)
+            template_context.update(context)
+            return templates.render(input_path, template_context)
         return processor
 
     def execute(self, builds):

@@ -1,5 +1,6 @@
 import os
 from .exceptions import TemplateRenderException
+from .helpers import replace_ext
 
 
 class BaseTemplates(object):
@@ -34,7 +35,8 @@ class BaseTemplates(object):
         path: path of a rendered file relative to the source directory.
         """
         head, tail = os.path.split(path)
-        yield path
+        base, ext = os.path.splitext(tail)
+        yield replace_ext(path, ext, '.html')
         yield os.path.join(head, self.base_template_name)
         yield self.base_template_name
 

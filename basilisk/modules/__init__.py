@@ -45,6 +45,9 @@ class Module(object):
 
 
 # Easier import names.
+from .markdown import MarkdownModule
+markdown = MarkdownModule
+
 from .templates import TemplatesModule
 templates = TemplatesModule
 
@@ -53,3 +56,6 @@ pretty_urls = PrettyUrlsModule
 
 from .i18n import InternationalizationModule
 i18n = InternationalizationModule
+
+from .listing import ListingModule
+listing = ListingModule

@@ -35,6 +35,7 @@ class Builder(object):
         'modules': ['pretty_urls', 'html'],
         # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
+        'just_copy': ['.pdf', '.tar.gz'], 
     }
 
     def __init__(self, source_directory, output_directory,
@@ -148,9 +149,22 @@ class Builder(object):
                 input_path = os.path.join(subdirectory, filename)
                 if not self.should_build(input_path):
                     continue
-                ext = os.path.splitext(input_path)[1]
-                output_path = replace_ext(input_path, ext, '.html')
+
+                just_copy = False
+                for cext in self.config.get('just_copy', []):
+                    if input_path.endswith(cext):
+                        just_copy = True
+                        break
+
+                if just_copy:
+                    output_path = input_path
+                else:
+                    ext = os.path.splitext(input_path)[1]
+                    output_path = replace_ext(input_path, ext, '.html')
+
                 build = Build(input_path, output_path)
+                build.parameters = build.read(self.source_directory)[1] if not just_copy else None
+                build.just_copy = just_copy
                 logger.debug('Yielding object: %s', build)
                 yield build
 
@@ -163,4 +177,4 @@ class Builder(object):
 
         for build in builds:
             logger.info('Building %s', build)
-            build.execute(self.source_directory, self.output_directory)
+            build.execute(self.config, self.source_directory, self.output_directory)

@@ -1,4 +1,5 @@
 import os
+import shutil
 from .helpers import replace_ext
 
 
@@ -17,6 +18,10 @@ class Build(object):
         # Expected function signature:
         # str process(str content, dict parameters)
         self.processors = []
+        self.additional_context = {}
+        # This is populated after init by builder. Modules might need those.
+        self.parameters = []
+        self.just_copy = False
 
     def __str__(self):
         return '%s->%s' % (self.input_path, self.output_path)
@@ -71,8 +76,22 @@ class Build(object):
         with open(path, 'w') as f:
             f.write(content)
 
-    def execute(self, source_directory, output_directory):
-        content, parameters = self.read(source_directory)
-        for p in self.processors:
-            content = p(content, parameters)
-        self.write(output_directory, content)
+    def execute(self, config, source_directory, output_directory):
+        if self.just_copy:
+            inpath = os.path.join(source_directory, self.input_path)
+            outpath = os.path.join(output_directory, self.output_path)
+            outdir = os.path.dirname(outpath)
+            if not os.path.exists(outdir):
+                os.makedirs(outdir)
+            shutil.copyfile(inpath, outpath)
+        else:
+            content, parameters = self.read(source_directory)
+            for p in self.processors:
+                context = {
+                    'parameters': parameters,
+                    'config': config,
+                    'directory': os.path.dirname(self.output_path)
+                }
+                context.update(self.additional_context)
+                content = p(content, context)
+            self.write(output_directory, content)
