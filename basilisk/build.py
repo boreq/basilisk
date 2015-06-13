@@ -82,6 +82,7 @@ class Build(object):
 
     def execute(self, config, source_directory, output_directory):
         inpath = os.path.join(source_directory, self.input_path)
+        indir = os.path.dirname(inpath)
         outpath = os.path.join(output_directory, self.output_path)
         outdir = os.path.dirname(outpath)
 
@@ -92,9 +93,8 @@ class Build(object):
         else:
             if self.exec_with:
                 command = self.exec_with % inpath
-                r = subprocess.check_output(command, shell=True)
-                r = r.decode('utf-8')
-                content, parameters = self.parse_lines(r.splitlines())
+                r = subprocess.check_output(command, shell=True, cwd=indir, universal_newlines=True)
+                content, parameters = self.parse_lines(r)
             else:
                 content, parameters = self.read(source_directory)
 
