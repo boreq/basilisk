@@ -36,6 +36,10 @@ class Builder(object):
         # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
         'just_copy': ['.pdf', '.tar.gz'], 
+        'exec': {
+            '.py': 'python %s',
+            '.sh': 'bash %s'
+        }
     }
 
     def __init__(self, source_directory, output_directory,
@@ -139,6 +143,18 @@ class Builder(object):
                 return False
         return True
 
+    def should_just_copy(self, path):
+        for ext in self.config.get('just_copy', []):
+            if path.endswith(ext):
+                return True
+        return False
+
+    def should_exec_with(self, path):
+        for ext, command in self.config.get('exec', {}).items():
+            if path.endswith(ext):
+                return command
+        return None
+
     def builds_generator(self):
         """Yields Build objects used to create initial Environment object."""
         base_path_length = len(self.source_directory) + 1
@@ -150,11 +166,8 @@ class Builder(object):
                 if not self.should_build(input_path):
                     continue
 
-                just_copy = False
-                for cext in self.config.get('just_copy', []):
-                    if input_path.endswith(cext):
-                        just_copy = True
-                        break
+                just_copy = self.should_just_copy(input_path)
+                exec_with = self.should_exec_with(input_path)
 
                 if just_copy:
                     output_path = input_path
@@ -165,16 +178,20 @@ class Builder(object):
                 build = Build(input_path, output_path)
                 build.parameters = build.read(self.source_directory)[1] if not just_copy else None
                 build.just_copy = just_copy
+                build.exec_with = exec_with
                 logger.debug('Yielding object: %s', build)
                 yield build
 
     def run(self):
+        logger.info('Scanning files')
         builds = [build for build in self.builds_generator()]
 
+        logger.info('Running modules')
         for module in self.iter_modules():
-            logger.info('Running %s', module)
+            logger.debug('Running %s', module)
             module.execute(builds)
 
+        logger.info('Building')
         for build in builds:
-            logger.info('Building %s', build)
+            logger.debug('Building %s', build)
             build.execute(self.config, self.source_directory, self.output_directory)

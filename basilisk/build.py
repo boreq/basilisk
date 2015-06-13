@@ -1,4 +1,5 @@
 import os
+import subprocess
 import shutil
 from .helpers import replace_ext
 
@@ -49,11 +50,14 @@ class Build(object):
 
     def read(self, source_directory):
         """Reads content and parameters from the input file."""
-        parameters = {}
-        content = ''
         path = os.path.join(source_directory, self.input_path)
         with open(path, 'r') as f:
             lines = f.readlines()
+        return self.parse_lines(lines)
+
+    def parse_lines(self, lines):
+        parameters = {}
+        content = ''
         for line in lines:
             if not content:
                 parameter = self.read_parameter(line)
@@ -77,15 +81,23 @@ class Build(object):
             f.write(content)
 
     def execute(self, config, source_directory, output_directory):
+        inpath = os.path.join(source_directory, self.input_path)
+        outpath = os.path.join(output_directory, self.output_path)
+        outdir = os.path.dirname(outpath)
+
         if self.just_copy:
-            inpath = os.path.join(source_directory, self.input_path)
-            outpath = os.path.join(output_directory, self.output_path)
-            outdir = os.path.dirname(outpath)
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             shutil.copyfile(inpath, outpath)
         else:
-            content, parameters = self.read(source_directory)
+            if self.exec_with:
+                command = self.exec_with % inpath
+                r = subprocess.check_output(command, shell=True)
+                r = r.decode('utf-8')
+                content, parameters = self.parse_lines(r.splitlines())
+            else:
+                content, parameters = self.read(source_directory)
+
             for p in self.processors:
                 context = {
                     'parameters': parameters,
