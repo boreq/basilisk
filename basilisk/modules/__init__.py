@@ -54,8 +54,8 @@ templates = TemplatesModule
 from .pretty_urls import PrettyUrlsModule
 pretty_urls = PrettyUrlsModule
 
-from .i18n import InternationalizationModule
-i18n = InternationalizationModule
-
 from .listing import ListingModule
 listing = ListingModule
+
+from .manuals import ManualsModule
+manuals = ManualsModule
