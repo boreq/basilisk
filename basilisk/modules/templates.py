@@ -4,9 +4,7 @@ from ..templates import Jinja2Templates
 
 
 class TemplatesModule(Module):
-    """Simply runs .html files through templates and copies them otherwise
-    unchanged.
-    """
+    """Adds a processor to all files which runs them through templates."""
 
     def make_processor(self, templates, input_path):
         def processor(content, context):

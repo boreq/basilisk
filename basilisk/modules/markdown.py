@@ -4,7 +4,9 @@ from . import Module
 
 
 class MarkdownModule(Module):
-    """Converts markdown in .md5 to html."""
+    """Incjects a processor to .md files which runs their content through
+    markdown converter therefore converting them to html.
+    """
 
     priority = -5
 

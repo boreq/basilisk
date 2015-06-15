@@ -14,15 +14,29 @@ class Build(object):
     def __init__(self, input_path, output_path):
         self.input_path = input_path
         self.output_path = output_path
+
         # List of functions which will be used to process the content of the
         # input file before saving it in the output file.
+        # Basically: input file -> processors -> output file
+        # Think about this like about running a stream through pipes.
         # Expected function signature:
         # str process(str content, dict parameters)
         self.processors = []
+
+        # Additional context which will be passed to processors. See Build.execute
         self.additional_context = {}
+
         # This is populated after init by builder. Modules might need those.
         self.parameters = []
+
+        # If this is true the whole file will be copied without any modifications.
+        # Processors will not run in this instance.
         self.just_copy = False
+
+        # If this is not None the file will be executed with the command set
+        # in this variable instead of being read directly. This variable can
+        # for example be set to `bash %s` or `python %s`.
+        self.execute_with = None
 
     def __str__(self):
         return '%s->%s' % (self.input_path, self.output_path)
@@ -49,13 +63,24 @@ class Build(object):
         return {}
 
     def read(self, source_directory):
-        """Reads content and parameters from the input file."""
+        """Reads content and parameters from the input file.
+        See Build.parse_lines.
+
+        source_directory: path to the source directory with all files.
+        """
         path = os.path.join(source_directory, self.input_path)
         with open(path, 'r') as f:
             lines = f.readlines()
         return self.parse_lines(lines)
 
     def parse_lines(self, lines):
+        """Parses the lines presumably from the input file. First lines containing
+        ':' characters are intepreted as `key: value` pairs. Those pais populate
+        the second field of the returned tuple. Everything else below it 
+        is considered as content and returned as the first element of a tuple.
+        Parameters must be separated from content with a blank line or the first
+        line of content can't contain a ':' character.
+        """
         parameters = {}
         content = ''
         for line in lines:
@@ -81,6 +106,14 @@ class Build(object):
             f.write(content)
 
     def execute(self, config, source_directory, output_directory):
+        """Runs the build.
+
+        1. If self.just_copy is set just copies input file to output file
+           without altering it.
+        2. If not if reads the input file (or executes it if self.execute_with
+           is set), runs the content through processors and saves it in output
+           file.
+        """
         inpath = os.path.join(source_directory, self.input_path)
         indir = os.path.dirname(inpath)
         outpath = os.path.join(output_directory, self.output_path)
@@ -91,6 +124,7 @@ class Build(object):
                 os.makedirs(outdir)
             shutil.copyfile(inpath, outpath)
         else:
+            # Run the file and get stdout or just read it
             if self.exec_with:
                 command = self.exec_with % inpath
                 r = subprocess.check_output(command, shell=True, cwd=indir, universal_newlines=True)
