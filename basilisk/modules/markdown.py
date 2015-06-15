@@ -1,5 +1,4 @@
 import markdown
-import os
 from . import Module
 
 
