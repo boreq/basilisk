@@ -1,8 +1,10 @@
+import logging
 import os
 import subprocess
 import shutil
 from .helpers import replace_ext
 
+logger = logging.getLogger('builder')
 
 class Build(object):
     """Represents one conversion from an input file to an output file.
@@ -70,7 +72,12 @@ class Build(object):
         """
         path = os.path.join(source_directory, self.input_path)
         with open(path, 'r') as f:
-            lines = f.readlines()
+            try:
+                lines = f.readlines()
+            except:
+                logger.error('Error in "%s". Is the file encoded in UTF-8, the only sane encoding format?', self.input_path)
+                raise
+
         return self.parse_lines(lines)
 
     def parse_lines(self, lines):
@@ -90,6 +97,13 @@ class Build(object):
                     parameters.update(parameter)
                     continue
             content += line
+
+        if content.startswith('\r\n'):
+            content = content[2:]
+        else:
+            if content.startswith('\n'):
+                content = content[1:]
+
         return (content, parameters)
 
     def write(self, output_directory, content):
