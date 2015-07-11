@@ -116,7 +116,7 @@ class Builder(object):
 
         # Ignore if any part of the path starts with an underscore.
         def ignore_prefixed(path):
-            for part in path.split(os.pathsep):
+            for part in path.split(os.sep):
                 if part.startswith(self.config['ignore_prefix']):
                     return True
         self.ignored.append(ignore_prefixed)
