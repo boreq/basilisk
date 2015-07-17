@@ -59,3 +59,6 @@ listing = ListingModule
 
 from .manuals import ManualsModule
 manuals = ManualsModule
+
+from .escape import EscapeModule
+escape = EscapeModule
