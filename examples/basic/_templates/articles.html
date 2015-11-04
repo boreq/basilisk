@@ -1,0 +1,14 @@
+{% extends "_base.html" %}l
+
+{% block content %}
+
+    {{ content }}
+
+    <ul>
+        {% for name, data in current_listing.items() %}
+            {% if data.type == "directory" %}
+                <li><a href="{{ name }}">{{ data.content['index.html'].parameters.title }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endblock%}
