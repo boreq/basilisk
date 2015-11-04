@@ -3,7 +3,7 @@ from . import Module
 
 
 class MarkdownModule(Module):
-    """Incjects a processor to .md files which runs their content through
+    """Injects a processor to .md files which runs their content through
     markdown converter therefore converting them to html.
     """
 

@@ -3,8 +3,8 @@ from . import Module
 
 
 class EscapeModule(Module):
-    """Incjects a processor to .md files which runs their content through
-    markdown converter therefore converting them to html.
+    """Injects a module which escapes all html from files (unless an extension
+    is excluded in the build config).
     """
 
     priority = -10
