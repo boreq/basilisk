@@ -1,16 +1,8 @@
 """
-    All functionality is implemented by modules. Modules operate on the
-    environment objects. Original list containing one initial environment object
-    is created in the builder. After that `Module.preprocess()` method of all
-    modules is called on that list. Modules can modify the existing environment
-    or create new ones. After all modules preprocess the list `Module.execute()`
-    method of each module is called on all environments stored in that list.
+    All functionality is implemented by modules. Modules operate on the build
+    objects. Original list containing those objects is created in the builder.
+    After that `Module.run()` method of all modules is called on that list.
     See Builder.run() for more information.
-
-    Modules can access builder through the `Module.load()` method. That way it
-    is possible for example to access the global config file. Module-specific
-    config keys should be prefixed with the module name, for example
-    `i18n_languages`, in order to prevent config key collisions.
 """
 
 
@@ -40,31 +32,33 @@ class Module(object):
     def load(self, builder):
         """Called when the module is loaded in the builder.
         
-        builder: Builder object.
+        builder: a Builder object.
         """
-        pass
+        self.builder = builder
 
-    def preprocess(self, environment_list):
-        """Allows the module to modify the list of environments.
+    def execute(self, builds):
+        """Run a module
 
-        environment_list: list of Environment objects.
-        """
-        return environment_list
-
-    def execute(self, environment):
-        """Execute a build of one environment.
-
-        environment: Environment object.
+        builds: List of Build objects.
         """
         pass
 
 
 # Easier import names.
-from .html import HtmlModule
-html = HtmlModule
+from .markdown import MarkdownModule
+markdown = MarkdownModule
+
+from .templates import TemplatesModule
+templates = TemplatesModule
 
 from .pretty_urls import PrettyUrlsModule
 pretty_urls = PrettyUrlsModule
 
-from .i18n import InternationalizationModule
-i18n = InternationalizationModule
+from .listing import ListingModule
+listing = ListingModule
+
+from .manuals import ManualsModule
+manuals = ManualsModule
+
+from .escape import EscapeModule
+escape = EscapeModule

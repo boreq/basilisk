@@ -17,18 +17,17 @@ class PrettyUrlsModule(Module):
     to 'directory_name/index.html' and outputs would overwrite each other.
     """
 
-    priority = -10
+    priority = -5
 
     def explode_path(self, path):
         head, tail = os.path.split(path)
         base_name, ext = os.path.splitext(tail)
         return (head, base_name, ext)
 
-    def preprocess(self, environment_list):
-        for environment in environment_list:
-            for build in environment.builds:
+    def execute(self, builds):
+        for build in builds:
+            if not build.just_copy:
                 head, base_name, ext = self.explode_path(build.output_path)
                 if base_name != 'index':
                     self.logger.debug('Changing output of %s', build)
                     build.output_path = os.path.join(head, base_name, 'index' + ext)
-        return environment_list

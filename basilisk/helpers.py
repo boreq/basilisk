@@ -4,7 +4,10 @@ import shutil
 
 def replace_ext(path, old, new):
     """Replaces extension in the path from old to new."""
-    return path[:-len(old)] + new
+    if old:
+        return path[:-len(old)] + new
+    else:
+        return path + new
 
 
 def import_by_name(name):
