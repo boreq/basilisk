@@ -4,7 +4,7 @@ from . import Module
 
 class MarkdownModule(Module):
     """Injects a processor to .md files which runs their content through
-    markdown converter therefore converting them to html.
+    markdown converter therefore converting them to HTML.
     """
 
     priority = -5

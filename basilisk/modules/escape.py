@@ -3,8 +3,8 @@ from . import Module
 
 
 class EscapeModule(Module):
-    """Injects a module which escapes all html from files (unless an extension
-    is excluded in the build config).
+    """Injects a module which escapes all HTML special characters present in
+    files (unless an extension is excluded in the build config).
     """
 
     priority = -10

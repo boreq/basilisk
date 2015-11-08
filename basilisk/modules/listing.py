@@ -4,7 +4,9 @@ from . import Module
 
 
 class ListingModule(Module):
-    """Adds additional context with lists of all files."""
+    """Adds additional context with lists of files present in a certain
+    directory.
+    """
 
     priority = -5
 
