@@ -2,7 +2,6 @@ import logging
 import os
 import subprocess
 import shutil
-from .helpers import replace_ext
 
 logger = logging.getLogger('builder')
 

@@ -1,5 +1,3 @@
-import html
-import markdown
 import os
 import subprocess
 from . import Module
@@ -8,7 +6,6 @@ from . import Module
 def troff_to_txt(text, macro='man'):
     command = 'nroff -%s | col -bx' % macro
     r = subprocess.check_output(command, shell=True, input=text, universal_newlines=True)
-    r = html.escape(r)
     return r
 
 
@@ -18,7 +15,7 @@ class ManualsModule(Module):
     `manuals` in the config file.
     """
 
-    priority = -5
+    priority = -15
 
     def make_processor(self, macro):
         def processor(content, *args, **kwargs):
