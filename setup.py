@@ -7,7 +7,7 @@ setup(
     author_email='boreq@sourcedrops.com',
     description = ('Static website generator.'),
     license='BSD',
-    packages=['basilisk'],
+    packages=['basilisk', 'basilisk.modules'],
     install_requires=[
         'Jinja2',
         'Markdown',
