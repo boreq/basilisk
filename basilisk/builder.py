@@ -143,19 +143,37 @@ class Builder(object):
         return True
 
     def should_just_copy(self, path):
+        """Returns True if a file which is stored under the provided path
+        should be copied without any changes.
+
+        path: Path to the file relative to the source directory root.
+        """
         for ext in self.config.get('just_copy', []):
             if path.endswith(ext):
                 return True
         return False
 
     def should_exec_with(self, path):
+        """Returns a command using which a file stored under the provided path
+        should be executed or None if that is not the case.
+
+        path: Path to the file relative to the source directory root.
+        """
         for ext, command in self.config.get('exec', {}).items():
             if path.endswith(ext):
                 return command
         return None
 
     def builds_generator(self):
-        """Yields Build objects used to create initial Environment object."""
+        """Yields initial Build objects. All files in the source directory are
+        scanned. For each file a build object is created and the output path is
+        set to the relative path in the source directory with the extension
+        changed to '.html'.
+
+        If a file is marked as 'just copy' the extension will not be changed.
+
+        If a file should be executed, that fact is marked in the build object.
+        """
         base_path_length = len(self.source_directory) + 1
 
         for (dirpath, dirnames, filenames) in os.walk(self.source_directory):
@@ -182,6 +200,7 @@ class Builder(object):
                 yield build
 
     def run(self):
+        """This is the main function which should be executed to run a build."""
         logger.info('Scanning files')
         builds = [build for build in self.builds_generator()]
 

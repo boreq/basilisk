@@ -1,7 +1,7 @@
 """
     All functionality is implemented by modules. Modules operate on the build
     objects. Original list containing those objects is created in the builder.
-    After that `Module.run()` method of all modules is called on that list.
+    After that Module.execute() method of all modules is called on that list.
     See Builder.run() for more information.
 """
 
@@ -37,7 +37,7 @@ class Module(object):
         self.builder = builder
 
     def execute(self, builds):
-        """Run a module
+        """Runs a module.
 
         builds: List of Build objects.
         """
