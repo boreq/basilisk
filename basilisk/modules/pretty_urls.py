@@ -6,7 +6,7 @@ class PrettyUrlsModule(Module):
     """Makes the urls "pretty" by moving all outputs not called `index.html`
     into a subdirectory. For example output called `directory/page.html`
     will be changed to `directory/page/index.html`. That way it will be possible
-    to access it simply using `directory/page/`. All `index.html` files are
+    to access it using `directory/page/`. All `index.html` files are
     unaffected. Watch out for conflicts in situations similar to this one:
 
         directory_name.html
@@ -15,6 +15,8 @@ class PrettyUrlsModule(Module):
 
     In the above scenario output of 'directory_name.html' would be changed
     to 'directory_name/index.html' and outputs would overwrite each other.
+
+    This module doesn't require any additional configuration.
     """
 
     priority = -5
