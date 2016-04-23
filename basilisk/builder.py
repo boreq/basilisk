@@ -35,10 +35,6 @@ class Builder(object):
         # Prefixed files are not added to the initial environment's build list.
         'ignore_prefix': '_',
         'just_copy': ['.pdf', '.tar.gz'], 
-        'exec': {
-            '.py': 'python %s',
-            '.sh': 'bash %s'
-        }
     }
 
     def __init__(self, source_directory, output_directory,
@@ -153,17 +149,6 @@ class Builder(object):
                 return True
         return False
 
-    def should_exec_with(self, path):
-        """Returns a command using which a file stored under the provided path
-        should be executed or None if that is not the case.
-
-        path: Path to the file relative to the source directory root.
-        """
-        for ext, command in self.config.get('exec', {}).items():
-            if path.endswith(ext):
-                return command
-        return None
-
     def builds_generator(self):
         """Yields initial Build objects. All files in the source directory are
         scanned. For each file a build object is created and the output path is
@@ -171,8 +156,6 @@ class Builder(object):
         changed to '.html'.
 
         If a file is marked as 'just copy' the extension will not be changed.
-
-        If a file should be executed, that fact is marked in the build object.
         """
         base_path_length = len(self.source_directory) + 1
 
@@ -184,7 +167,6 @@ class Builder(object):
                     continue
 
                 just_copy = self.should_just_copy(input_path)
-                exec_with = self.should_exec_with(input_path)
 
                 if just_copy:
                     output_path = input_path
@@ -193,9 +175,7 @@ class Builder(object):
                     output_path = replace_ext(input_path, ext, '.html')
 
                 build = Build(input_path, output_path)
-                build.parameters = build.read(self.source_directory)[1] if not just_copy else None
                 build.just_copy = just_copy
-                build.exec_with = exec_with
                 logger.debug('Yielding object: %s', build)
                 yield build
 

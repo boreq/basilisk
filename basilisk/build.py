@@ -3,7 +3,9 @@ import os
 import subprocess
 import shutil
 
+
 logger = logging.getLogger('builder')
+
 
 class Build(object):
     """Represents one conversion from an input file to an output file.
@@ -16,35 +18,27 @@ class Build(object):
         self.input_path = input_path
         self.output_path = output_path
 
-        # List of functions which will be used to process the content of the
-        # input file before saving it in the output file.
-        # Basically: input file -> processors -> output file
-        # Think about this like about running a stream through pipes.
+        # A list of functions which will be used to process the contents of the
+        # input file before saving it in the output file. Think about this in
+        # terms of running the input through a series of pipes.
         # Expected function signature:
-        # str process(str content, dict parameters)
+        # str processor(str content, dict context)
         self.processors = []
 
-        # Additional context which will be passed to processors. See Build.execute
+        # Additional context which will be passed to processors.
+        # See Build.get_context and Build.execute.
         self.additional_context = {}
-
-        # This is populated after init by builder. Modules might need those.
-        self.parameters = []
 
         # If this is true the whole file will be copied without any modifications.
         # Processors will not run in this instance.
         self.just_copy = False
-
-        # If this is not None the file will be executed with the command set
-        # in this variable instead of being read directly. This variable can
-        # for example be set to `bash %s` or `python %s`.
-        self.execute_with = None
 
     def __str__(self):
         return '%s->%s' % (self.input_path, self.output_path)
 
     def __repr__(self):
         return '<%s.%s %s>' % (self.__module__, self.__class__.__name__,
-                                  self__str__())
+                               self.__str__())
 
     def read_parameter(self, line):
         """Reads a parameter from a line of text. Parameters are structured in
@@ -52,8 +46,9 @@ class Build(object):
 
             parameter_name: value
 
-        Parameters defined like that are passed in the template context as
-        a dictionary called `parameters` with names of the parameters as keys.
+        Parameters defined like that are passed in the to the processors in the
+        context as a dictionary called `parameters` with names of the parameters
+        as keys.
 
         line: string.
         """
@@ -63,29 +58,26 @@ class Build(object):
             return {key: value}
         return {}
 
-    def read(self, source_directory):
-        """Reads content and parameters from the input file.
-        See Build.parse_lines.
+    def read(self, path):
+        """Reads and returns the content of the input file.
 
-        source_directory: path to the source directory with all files.
+        path: absolute path to the input file.
         """
-        path = os.path.join(source_directory, self.input_path)
         with open(path, 'r') as f:
             try:
-                lines = f.readlines()
+                return f.readlines()
             except:
                 logger.error('Error in "%s". Is the file encoded in UTF-8, the only sane encoding format?', self.input_path)
                 raise
 
-        return self.parse_lines(lines)
-
     def parse_lines(self, lines):
-        """Parses the lines presumably from the input file. First lines containing
-        ':' characters are intepreted as `key: value` pairs. Those pais populate
-        the second field of the returned tuple. Everything else below it 
-        is considered as content and returned as the first element of a tuple.
-        Parameters must be separated from content with a blank line or the first
-        line of content can't contain a ':' character.
+        """Parses the lines (presumably from the input file). First lines
+        containing the ':' characters are intepreted as `key: value` pairs.
+        Those pais populate the second field of the returned tuple. Everything
+        else after those `key: value` pairs is considered to be the  content of
+        the file and returned as the first element of a tuple. Parameters must
+        be separated from content with a blank line or the first line of content
+        can't contain a ':' character.
         """
         parameters = {}
         content = ''
@@ -118,14 +110,25 @@ class Build(object):
         with open(path, 'w') as f:
             f.write(content)
 
+    def get_context(self, parameters, config):
+        """Creates the context which is passed to the processors. The context
+        contains the parameters defined at the top of the source file, provided
+        config and additional context defined by the modules.
+        """
+        context = {
+            'parameters': parameters,
+            'config': config,
+        }
+        context.update(self.additional_context)
+        return context
+
     def execute(self, config, source_directory, output_directory):
         """Runs the build.
 
         1. If self.just_copy is set just copies input file to output file
            without altering it.
-        2. If not if reads the input file (or executes it if self.execute_with
-           is set), runs the content through processors and saves it in output
-           file.
+        2. If not it reads the input file, runs the content through processors
+           and saves it in the output file.
         """
         inpath = os.path.join(source_directory, self.input_path)
         indir = os.path.dirname(inpath)
@@ -137,20 +140,9 @@ class Build(object):
                 os.makedirs(outdir)
             shutil.copyfile(inpath, outpath)
         else:
-            # Run the file and get stdout or just read it
-            if self.exec_with:
-                command = self.exec_with % inpath
-                r = subprocess.check_output(command, shell=True, cwd=indir, universal_newlines=True)
-                content, parameters = self.parse_lines(r)
-            else:
-                content, parameters = self.read(source_directory)
-
+            lines = self.read(inpath)
+            content, parameters = self.parse_lines(lines)
             for p in self.processors:
-                context = {
-                    'parameters': parameters,
-                    'config': config,
-                    'directory': os.path.dirname(self.output_path)
-                }
-                context.update(self.additional_context)
+                context = self.get_context(parameters, config)
                 content = p(content, context)
             self.write(output_directory, content)
