@@ -118,6 +118,7 @@ class Build(object):
         context = {
             'parameters': parameters,
             'config': config,
+            'directory': os.path.dirname(self.output_path),
         }
         context.update(self.additional_context)
         return context
