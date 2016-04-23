@@ -4,6 +4,10 @@
 
     {{ content }}
 
+    <p>
+        This page uses a special template to list the contents of a
+        subdirectory.
+    </p>
     <ul>
         {% for name, data in current_listing.items() %}
             {% if data.type == "directory" %}
