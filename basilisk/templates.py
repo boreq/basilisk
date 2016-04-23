@@ -37,7 +37,13 @@ class BaseTemplates(object):
         head, tail = os.path.split(path)
         base, ext = os.path.splitext(tail)
         yield replace_ext(path, ext, '.html')
-        yield os.path.join(head, self.base_template_name)
+
+        while True:
+            yield os.path.join(head, self.base_template_name)
+            head, tail = os.path.split(head)
+            if not head:
+                break
+
         yield self.base_template_name
 
     def _render_template(self, path, context):
