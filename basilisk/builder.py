@@ -32,8 +32,12 @@ class Builder(object):
     default_config = {
         # Modules to load.
         'modules': ['pretty_urls', 'html'],
-        # Prefixed files are not added to the initial environment's build list.
+
+        # Prefixed files are not added to the initial build list.
         'ignore_prefix': '_',
+
+        # Files ending with those extensions will be copied without changing
+        # their contents.
         'just_copy': ['.pdf', '.tar.gz'], 
     }
 
@@ -79,7 +83,10 @@ class Builder(object):
                     raise BuildException(msg)
 
     def get_config(self):
-        """Returns Config object."""
+        """Returns a Config object. The config object is filled with the default
+        config values and then updated with the values from the config file
+        located in the source directory.
+        """
         config = self.config_class(self.default_config)
         try:
             config_path = os.path.join(self.source_directory, self.config_file)
@@ -89,7 +96,7 @@ class Builder(object):
         return config
 
     def init_modules(self):
-        """Initializes all modules defined in the config."""
+        """Loads all modules defined in the config."""
         for module_name in self.config['modules']:
             try:
                 import_name = 'basilisk.modules.' + module_name
@@ -101,9 +108,9 @@ class Builder(object):
 
     def init_ignored(self):
         """Adds callables used to detect files which should be ignored and not
-        added to the initial environment.
+        added to the initial build list.
         """
-        # Ignore config file.
+        # Ignore the config file.
         def ignore_config(path):
             if os.path.commonprefix([self.config_file, path]):
                 return True
