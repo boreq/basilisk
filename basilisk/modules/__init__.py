@@ -21,6 +21,17 @@ class Module(object):
     def __str__(self):
         return self.__class__.__name__
 
+    @classmethod
+    def get_help(cls):
+        # It is necessary to fix the indentation of the first line. It is
+        # usually inconsitent with the rest of the docstring if PEP 257 is
+        # followed (see section "Multi-line Docstrings").
+        lines = cls.__doc__.splitlines()
+        if len(lines) > 1:
+            num_spaces = lines[1].count(' ') - lines[1].lstrip(' ').count(' ')
+            lines[0] = ' ' * num_spaces + lines[0]
+        return '\n'.join(lines)
+
     @property
     def logger(self):
         """Use this logger to log messages in the module."""
@@ -31,7 +42,7 @@ class Module(object):
 
     def load(self, builder):
         """Called when the module is loaded in the builder.
-        
+
         builder: a Builder object.
         """
         self.builder = builder
@@ -45,20 +56,23 @@ class Module(object):
 
 
 # Easier import names.
-from .markdown import MarkdownModule
-markdown = MarkdownModule
+from .markdown import MarkdownModule as _MarkdownModule
+markdown = _MarkdownModule
 
-from .templates import TemplatesModule
-templates = TemplatesModule
+from .templates import TemplatesModule as _TemplatesModule
+templates = _TemplatesModule
 
-from .pretty_urls import PrettyUrlsModule
-pretty_urls = PrettyUrlsModule
+from .pretty_urls import PrettyUrlsModule as _PrettyUrlsModule
+pretty_urls = _PrettyUrlsModule
 
-from .listing import ListingModule
-listing = ListingModule
+from .listing import ListingModule as _ListingModule
+listing = _ListingModule
 
-from .manuals import ManualsModule
-manuals = ManualsModule
+from .manuals import ManualsModule as _ManualsModule
+manuals = _ManualsModule
 
-from .escape import EscapeModule
-escape = EscapeModule
+from .escape import EscapeModule as _EscapeModule
+escape = _EscapeModule
+
+from .exec_with import ExecWithModule as _ExecWithModule
+exec_with = _ExecWithModule
