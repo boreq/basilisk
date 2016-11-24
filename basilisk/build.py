@@ -1,6 +1,5 @@
 import logging
 import os
-import subprocess
 import shutil
 
 
@@ -132,7 +131,6 @@ class Build(object):
            and saves it in the output file.
         """
         inpath = os.path.join(source_directory, self.input_path)
-        indir = os.path.dirname(inpath)
         outpath = os.path.join(output_directory, self.output_path)
         outdir = os.path.dirname(outpath)
 
