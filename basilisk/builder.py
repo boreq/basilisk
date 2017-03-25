@@ -35,10 +35,6 @@ class Builder(object):
 
         # Prefixed files are not added to the initial build list.
         'ignore_prefix': '_',
-
-        # Files ending with those extensions will be copied without changing
-        # their contents.
-        'just_copy': ['.pdf', '.tar.gz'], 
     }
 
     def __init__(self, source_directory, output_directory,
@@ -145,17 +141,6 @@ class Builder(object):
                 return False
         return True
 
-    def should_just_copy(self, path):
-        """Returns True if a file which is stored under the provided path
-        should be copied without any changes.
-
-        path: Path to the file relative to the source directory root.
-        """
-        for ext in self.config.get('just_copy', []):
-            if path.endswith(ext):
-                return True
-        return False
-
     def builds_generator(self):
         """Yields initial Build objects. All files in the source directory are
         scanned. For each file a build object is created and the output path is
@@ -173,16 +158,10 @@ class Builder(object):
                 if not self.should_build(input_path):
                     continue
 
-                just_copy = self.should_just_copy(input_path)
-
-                if just_copy:
-                    output_path = input_path
-                else:
-                    ext = os.path.splitext(input_path)[1]
-                    output_path = replace_ext(input_path, ext, '.html')
+                ext = os.path.splitext(input_path)[1]
+                output_path = replace_ext(input_path, ext, '.html')
 
                 build = Build(input_path, output_path)
-                build.just_copy = just_copy
                 logger.debug('Yielding object: %s', build)
                 yield build
 

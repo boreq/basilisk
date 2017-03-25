@@ -28,7 +28,7 @@ class PrettyUrlsModule(Module):
 
     def execute(self, builds):
         for build in builds:
-            if not build.just_copy:
+            if not getattr(build, 'just_copy', False):
                 head, base_name, ext = self.explode_path(build.output_path)
                 if base_name != 'index':
                     self.logger.debug('Changing output of %s', build)

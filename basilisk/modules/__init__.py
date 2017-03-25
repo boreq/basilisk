@@ -76,3 +76,6 @@ escape = _EscapeModule
 
 from .exec_with import ExecWithModule as _ExecWithModule
 exec_with = _ExecWithModule
+
+from .just_copy import JustCopyModule as _JustCopyModule
+just_copy = _JustCopyModule

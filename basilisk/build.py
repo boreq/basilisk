@@ -1,6 +1,5 @@
 import logging
 import os
-import shutil
 
 
 logger = logging.getLogger('builder')
@@ -27,10 +26,6 @@ class Build(object):
         # Additional context which will be passed to processors.
         # See Build.get_context and Build.execute.
         self.additional_context = {}
-
-        # If this is true the whole file will be copied without any modifications.
-        # Processors will not run in this instance.
-        self.just_copy = False
 
     def __str__(self):
         return '%s->%s' % (self.input_path, self.output_path)
@@ -123,25 +118,13 @@ class Build(object):
         return context
 
     def execute(self, config, source_directory, output_directory):
-        """Runs the build.
-
-        1. If self.just_copy is set just copies input file to output file
-           without altering it.
-        2. If not it reads the input file, runs the content through processors
-           and saves it in the output file.
+        """Runs the build. Reads the input file, runs the content through
+        processors and saves it in the output file.
         """
         inpath = os.path.join(source_directory, self.input_path)
-        outpath = os.path.join(output_directory, self.output_path)
-        outdir = os.path.dirname(outpath)
-
-        if self.just_copy:
-            if not os.path.exists(outdir):
-                os.makedirs(outdir)
-            shutil.copyfile(inpath, outpath)
-        else:
-            lines = self.read(inpath)
-            content, parameters = self.parse_lines(lines)
-            for p in self.processors:
-                context = self.get_context(parameters, config)
-                content = p(content, context)
-            self.write(output_directory, content)
+        lines = self.read(inpath)
+        content, parameters = self.parse_lines(lines)
+        for p in self.processors:
+            context = self.get_context(parameters, config)
+            content = p(content, context)
+        self.write(output_directory, content)
