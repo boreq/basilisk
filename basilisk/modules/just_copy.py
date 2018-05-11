@@ -5,16 +5,17 @@ from . import Module
 
 
 class JustCopyModule(Module):
-    """Injects a module which escapes all special HTML characters present in
-    the input files. This module is useful to escape plaintext files which can
-    contain special characters. Remember to exclude file extensions in the
-    config to prevent this module from escaping certain files if you want the
-    HTML they contain to be rendered.
-
+    """Copies files that have paths ending with specified strings instead of
+    building them.
+    
     Example config:
 
         {
-            "dont_escape": [".html"]
+            "just_copy": [
+                ".html",
+                "robots.txt",
+                "path/to/file.html"
+            ]
         }
 
     """

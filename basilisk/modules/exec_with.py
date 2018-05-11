@@ -5,8 +5,8 @@ from . import Module
 
 
 class ExecWithModule(Module):
-    """Executes specified executable files using the defined commands to produce
-    the input instead of just reading them.
+    """Executes specified executable files using the defined commands to
+    produce the input instead of just reading them.
 
     Example config:
 
