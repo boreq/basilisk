@@ -112,7 +112,7 @@ class BlogModule(Module):
 
         entry = {
             'path': path,
-            'relative_path': self.get_relative_path(build, blog_directory),
+            'directory': self.get_final_directory(build, blog_directory),
             'date': date,
             'parameters': parameters
         }
@@ -136,6 +136,11 @@ class BlogModule(Module):
     def get_relative_path(self, build, blog_directory):
         path = os.path.dirname(build.output_path)
         return path[len(blog_directory['directory']):]
+
+    def get_final_directory(self, build, blog_directory):
+        path = self.get_relative_path(build, blog_directory)
+        parts = path.split(os.sep)
+        return parts[3]
 
     def insert_dummy_builds(self, builds, blog_directory, listing, tree_listing):
         """Creates dummy builds so that directory listings could be created in
