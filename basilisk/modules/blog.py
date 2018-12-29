@@ -209,6 +209,7 @@ class BlogModule(Module):
                 if build.output_path.startswith(blog_directory['directory']):
                     entry = self.create_entry(build, blog_directory)
                     if entry:
+                        build.additional_context['date'] = entry['date']
                         listing.append(entry)
                         self.insert_into_tree_listing(tree_listing, entry)
 
