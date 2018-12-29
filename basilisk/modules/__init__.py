@@ -79,3 +79,6 @@ exec_with = _ExecWithModule
 
 from .just_copy import JustCopyModule as _JustCopyModule
 just_copy = _JustCopyModule
+
+from .blog import BlogModule as _BlogModule
+blog = _BlogModule
