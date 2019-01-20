@@ -120,15 +120,16 @@ class BlogModule(Module):
 
     def extract_date(self, build, blog_directory):
         try:
+            fmt = '{:02d}'
             path = self.get_relative_path(build, blog_directory)
             parts = path.split(os.sep)
             year = int(parts[0])
             month = int(parts[1])
             day = int(parts[2])
             return {
-                'year': year,
-                'month': month,
-                'day': day
+                'year': fmt.format(year),
+                'month': fmt.format(month),
+                'day': fmt.format(day)
             }
         except ValueError:
             return None
@@ -147,20 +148,17 @@ class BlogModule(Module):
         the templates.
         """
         for year in tree_listing:
-            year_str = str(year)
-            d = os.path.join(blog_directory['directory'], year_str, 'index.html')
+            d = os.path.join(blog_directory['directory'], year, 'index.html')
             build = DummyBuild(d, d, year, None, None)
             self.add_context(build, blog_directory, listing, tree_listing)
             builds.append(build)
             for month in tree_listing[year]:
-                month_str = '{:02d}'.format(month)
-                d = os.path.join(blog_directory['directory'], year_str, month_str, 'index.html')
+                d = os.path.join(blog_directory['directory'], year, month, 'index.html')
                 build = DummyBuild(d, d, year, month, None)
                 self.add_context(build, blog_directory, listing, tree_listing)
                 builds.append(build)
                 for day in tree_listing[year][month]:
-                    day_str = '{:02d}'.format(day)
-                    d = os.path.join(blog_directory['directory'], year_str, month_str, day_str, 'index.html')
+                    d = os.path.join(blog_directory['directory'], year, month, day, 'index.html')
                     build = DummyBuild(d, d, year, month, day)
                     self.add_context(build, blog_directory, listing, tree_listing)
                     builds.append(build)
