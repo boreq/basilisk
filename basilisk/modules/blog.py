@@ -147,17 +147,20 @@ class BlogModule(Module):
         the templates.
         """
         for year in tree_listing:
-            d = os.path.join(blog_directory['directory'], str(year), 'index.html')
+            year_str = str(year)
+            d = os.path.join(blog_directory['directory'], year_str, 'index.html')
             build = DummyBuild(d, d, year, None, None)
             self.add_context(build, blog_directory, listing, tree_listing)
             builds.append(build)
             for month in tree_listing[year]:
-                d = os.path.join(blog_directory['directory'], str(year), str(month), 'index.html')
+                month_str = '{:02d}'.format(month)
+                d = os.path.join(blog_directory['directory'], year_str, month_str, 'index.html')
                 build = DummyBuild(d, d, year, month, None)
                 self.add_context(build, blog_directory, listing, tree_listing)
                 builds.append(build)
                 for day in tree_listing[year][month]:
-                    d = os.path.join(blog_directory['directory'], str(year), str(month), str(day), 'index.html')
+                    day_str = '{:02d}'.format(day)
+                    d = os.path.join(blog_directory['directory'], year_str, month_str, day_str, 'index.html')
                     build = DummyBuild(d, d, year, month, day)
                     self.add_context(build, blog_directory, listing, tree_listing)
                     builds.append(build)
