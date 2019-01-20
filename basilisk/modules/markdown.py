@@ -13,7 +13,7 @@ class MarkdownModule(Module):
 
     def make_processor(self):
         def processor(content, *args, **kwargs):
-            return markdown.markdown(content)
+            return markdown.markdown(content, extensions=['tables'])
         return processor
 
     def execute(self, builds):
