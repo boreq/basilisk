@@ -6,5 +6,18 @@
         This part of the text is here because the index page uses a special
         template.
     </p>
+    <p>
+        Try those links to subpages generated with the listing module:
+        <ul>
+            {%- for name, data in current_listing | dictsort -%}
+                {% if data.type == 'directory' %}
+                    {% set index = data.content['index.html'].parameters %}
+                    <li>
+                        <a href="{{ name }}">{{ index.title }}</a>
+                    </li>
+                {% endif %}
+            {%- endfor -%}
+        </ul>
+    </p>
     {{ content }}
 {% endblock%}
