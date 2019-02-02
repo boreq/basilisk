@@ -29,16 +29,14 @@ class ManualsModule(Module):
 
     """
 
-    priority = -15
-
     def make_processor(self, macro):
         def processor(content, *args, **kwargs):
             return troff_to_txt(content, macro)
         return processor
 
-    def execute(self, builds):
+    def execute(self, build):
         for build in builds:
-            for macro, paths in self.builder.config['manuals'].items():
+            for macro, paths in self.config_get('manuals', []).items():
                 for path in paths:
                     # make sure that we don't match files by accident
                     # eg file /path/dir.ext would match with dir /path/dir

@@ -30,6 +30,8 @@ class TemplatesModule(Module):
 
     """
 
+    config_key = 'templates'
+
     def make_processor(self, templates, input_path):
         def processor(content, context):
             template_context = {
@@ -38,13 +40,19 @@ class TemplatesModule(Module):
             template_context.update(context)
             return templates.render(input_path, template_context)
         return processor
-
-    def execute(self, builds):
+    
+    def get_templates_dir(self):
         default_templates_dir = '%stemplates' % self.builder.config['ignore_prefix']
-        templates_dir = self.builder.config.get('templates_directory', default_templates_dir)
-        templates_dir = os.path.join(self.builder.source_directory, templates_dir)
-        templates = Jinja2Templates(templates_dir)
+        templates_dir = self.config_get('templates_directory', default_templates_dir)
+        return os.path.join(self.builder.source_directory, templates_dir)
 
-        for build in builds:
-            processor = self.make_processor(templates, build.input_path)
-            build.processors.append(processor)
+    def get_templates(self):
+        if not hasattr(self, 'templates'):
+            templates_dir = self.get_templates_dir()
+            self.templates = Jinja2Templates(templates_dir)
+        return self.templates
+
+    def execute(self, build):
+        templates = self.get_templates()
+        processor = self.make_processor(templates, build.input_path)
+        build.processors.append(processor)

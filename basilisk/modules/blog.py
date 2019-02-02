@@ -90,10 +90,10 @@ class BlogModule(Module):
 
     """
 
-    priority = -4
+    config_key = 'blog'
 
     def blog_directories(self):
-        return self.builder.config.get('blog_directories', [])
+        return self.config_get('directories', [])
 
     def create_entry(self, build, blog_directory):
         # Here we have to cheat a little to get the params by reading the
@@ -200,8 +200,10 @@ class BlogModule(Module):
         build.additional_context['blog'][blog_directory['name']]['listing'] = listing
         build.additional_context['blog'][blog_directory['name']]['tree'] = tree_listing
 
-    def execute(self, builds):
+    def postprocess(self, builds):
         for blog_directory in self.blog_directories():
+            self.logger.debug('blog directory %s', blog_directory)
+
             # Listing is a chronological listing of all blog articles starting
             # with the newest ones.
             listing = []

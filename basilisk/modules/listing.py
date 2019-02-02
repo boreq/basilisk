@@ -43,9 +43,7 @@ class ListingModule(Module):
     This module doesn't require any additional configuration.
     """
 
-    priority = -5
-
-    def execute(self, builds):
+    def postprocess(self, builds):
         listing = {}
         for build in builds:
             parts = build.output_path.split(os.sep)

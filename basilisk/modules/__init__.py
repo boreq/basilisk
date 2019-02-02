@@ -6,13 +6,11 @@
 """
 
 
+_sentinel = object()
+
+
 class Module(object):
     """Base module class."""
-
-    # Modules with lower priority are executed earlier. By assigning a higher
-    # value to a module you can execute it after the modules which produce
-    # output it requires.
-    priority = 0
 
     def __init__(self):
         self._logger_name = self.__class__.__name__
@@ -40,6 +38,17 @@ class Module(object):
             self._logger = logging.getLogger(self._logger_name)
         return self._logger
 
+    def config_get(self, key, default=_sentinel):
+        try:
+            return self.builder.config['module_config'][self.config_key][key]
+        except KeyError:
+            pass
+
+        if not default is _sentinel:
+            return default
+
+        raise KeyError
+
     def load(self, builder):
         """Called when the module is loaded in the builder.
 
@@ -47,8 +56,22 @@ class Module(object):
         """
         self.builder = builder
 
-    def execute(self, builds):
-        """Runs a module.
+    def preprocess(self, builds):
+        """Executes a preprocessing step.
+
+        builds: List of Build objects.
+        """
+        pass
+
+    def postprocess(self, builds):
+        """Executes a postprocessing step.
+
+        builds: List of Build objects.
+        """
+        pass
+
+    def execute(self, build):
+        """Runs a module on a build.
 
         builds: List of Build objects.
         """

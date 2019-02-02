@@ -20,19 +20,6 @@ class JustCopyModule(Module):
 
     """
 
-    priority = -25
-
-    def should_just_copy(self, path):
-        """Returns True if a file which is stored under the provided path
-        should be copied without any changes.
-
-        path: Path to the file relative to the source directory root.
-        """
-        for ext in self.builder.config.get('just_copy', []):
-            if path.endswith(ext):
-                return True
-        return False
-
     def make_method(self, build):
         m = build.execute
         def execute(self, config, source_directory, output_directory):
@@ -46,10 +33,8 @@ class JustCopyModule(Module):
             shutil.copyfile(inpath, outpath)
         return execute
 
-    def execute(self, builds):
-        for build in builds:
-            build.just_copy = self.should_just_copy(build.input_path)
-            if build.just_copy:
-                build.output_path = build.input_path
-                method = self.make_method(build)
-                build.execute = types.MethodType(method, build)
+    def execute(self, build):
+        build.output_path = build.input_path
+        method = self.make_method(build)
+        build.just_copy = True
+        build.execute = types.MethodType(method, build)

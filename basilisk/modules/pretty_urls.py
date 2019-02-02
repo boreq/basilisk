@@ -19,17 +19,13 @@ class PrettyUrlsModule(Module):
     This module doesn't require any additional configuration.
     """
 
-    priority = -5
-
     def explode_path(self, path):
         head, tail = os.path.split(path)
         base_name, ext = os.path.splitext(tail)
         return (head, base_name, ext)
 
-    def execute(self, builds):
-        for build in builds:
-            if not getattr(build, 'just_copy', False):
-                head, base_name, ext = self.explode_path(build.output_path)
-                if base_name != 'index':
-                    self.logger.debug('Changing output of %s', build)
-                    build.output_path = os.path.join(head, base_name, 'index' + ext)
+    def execute(self, build):
+        head, base_name, ext = self.explode_path(build.output_path)
+        if base_name != 'index':
+            self.logger.debug('Changing output of %s', build)
+            build.output_path = os.path.join(head, base_name, 'index' + ext)

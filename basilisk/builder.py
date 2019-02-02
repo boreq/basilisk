@@ -1,5 +1,6 @@
 import logging
 import os
+import fnmatch
 from .build import Build
 from .config import Config
 from .exceptions import BuildException
@@ -54,11 +55,9 @@ class Builder(object):
         # path should be ignored.
         self.ignored = []
 
-        # List of loaded modules.
-        self.modules = []
+        self.module_cache = {}
 
         self.init_ignored()
-        self.init_modules()
 
     def test_directories(self):
         """Performs sanity checks on the source and output directories."""
@@ -91,17 +90,6 @@ class Builder(object):
             logger.warning('Project does not contain the config file.')
         return config
 
-    def init_modules(self):
-        """Loads all modules defined in the config."""
-        for module_name in self.config['modules']:
-            try:
-                import_name = 'basilisk.modules.' + module_name
-                module_class = import_by_name(import_name)
-            except:
-                # TODO: try load an external module.
-                raise
-            self.load_module(module_class())
-
     def init_ignored(self):
         """Adds callables used to detect files which should be ignored and not
         added to the initial build list.
@@ -119,17 +107,51 @@ class Builder(object):
                     return True
         self.ignored.append(ignore_prefixed)
 
-    def load_module(self, module):
+    def load_module(self, module_name):
         """Loads a single module.
 
-        module: an instance of the class which inherits from Module.
+        module_name: a name of the module.
         """
+        try:
+            import_name = 'basilisk.modules.' + module_name
+            module_class = import_by_name(import_name)
+        except:
+            # TODO: try load an external module.
+            raise
+        module = module_class()
         module.load(self)
-        self.modules.append(module)
+        return module
 
-    def iter_modules(self):
-        """Iterates over loaded modules sorted by priority."""
-        return iter(sorted(self.modules, key=lambda x: x.priority))
+    def get_module(self, module_name):
+        """Retrieves a single module from cache or loads it.
+
+        module_name: a name of the module.
+        """
+        if not module_name in self.module_cache:
+            module = self.load_module(module_name)
+            self.module_cache[module_name] = module
+        return self.module_cache[module_name]
+
+    def get_pipeline(self, build):
+        for pipeline in self.config['pipelines']:
+            if not 'patterns' in pipeline:
+                raise ValueError('missing property: patterns')
+            for pattern in pipeline['patterns']:
+                if fnmatch.fnmatch(build.input_path, pattern):
+                    return pipeline
+        return None
+
+    def iter_modules(self, module_names):
+        return iter([self.get_module(name) for name in module_names])
+
+    def iter_global_modules(self):
+        """Iterates over global modules defined in the config."""
+        return self.iter_modules(self.config['modules'])
+
+    def iter_build_modules(self, build):
+        """Iterates over build specific modules."""
+        pipeline = self.get_pipeline(build)
+        return self.iter_modules(pipeline['modules'])
 
     def should_build(self, path):
         """Decides if a Build using this path as an input should be created.
@@ -170,10 +192,22 @@ class Builder(object):
         logger.info('Scanning files')
         builds = [build for build in self.builds_generator()]
 
-        logger.info('Running modules')
-        for module in self.iter_modules():
-            logger.debug('Running %s', module)
-            module.execute(builds)
+        logger.info('Preprocessing builds')
+        for module in self.iter_global_modules():
+            logger.debug('Preprocessing using %s', module)
+            module.preprocess(builds)
+
+        logger.info('Processing builds')
+        for build in builds:
+            logger.debug('Processing %s', build)
+            for module in self.iter_build_modules(build):
+                logger.debug('Processing using %s', module)
+                module.execute(build)
+
+        logger.info('Postprocessing builds')
+        for module in self.iter_global_modules():
+            logger.debug('Postprocessing using %s', module)
+            module.postprocess(builds)
 
         logger.info('Building')
         for build in builds:

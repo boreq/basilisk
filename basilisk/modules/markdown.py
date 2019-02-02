@@ -9,15 +9,12 @@ class MarkdownModule(Module):
     This module doesn't require any additional configuration.
     """
 
-    priority = -5
-
     def make_processor(self):
         def processor(content, *args, **kwargs):
             return markdown.markdown(content, extensions=['tables'])
         return processor
 
-    def execute(self, builds):
-        for build in builds:
-            if build.input_path.endswith('.md'):
-                processor = self.make_processor()
-                build.processors.append(processor)
+    def execute(self, build):
+        if build.input_path.endswith('.md'):
+            processor = self.make_processor()
+            build.processors.append(processor)
