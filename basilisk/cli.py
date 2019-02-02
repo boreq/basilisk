@@ -11,10 +11,14 @@ logger = logging.getLogger('cli')
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
+@click.option('--progress/--no-progress', default=False)
 @click.pass_context
-def cli(ctx, debug):
+def cli(ctx, debug, progress):
     """Basilisk is a static website generator."""
-    ctx.obj = {'DEBUG': debug}
+    ctx.obj = {
+        'DEBUG': debug,
+        'PROGRESS': progress,
+    }
     log_format = (debug and DEBUG_LOG_FORMAT) or LOG_FORMAT
     log_level = (debug and logging.DEBUG) or logging.INFO
     logging.basicConfig(format=log_format, level=log_level)
@@ -27,7 +31,7 @@ def cli(ctx, debug):
 def build(ctx, source_directory, output_directory):
     """Builds a project."""
     try:
-        builder = Builder(source_directory, output_directory)
+        builder = Builder(source_directory, output_directory, progress=ctx.obj['PROGRESS'])
         builder.run()
     except Exception as e:
         logger.critical(e)

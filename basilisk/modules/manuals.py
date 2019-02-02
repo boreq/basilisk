@@ -1,5 +1,6 @@
 import os
 import subprocess
+import fnmatch
 from . import Module
 
 
@@ -20,7 +21,7 @@ class ManualsModule(Module):
     Example config:
 
         {
-            "manuals": {
+            "macros": {
                 "man": [
                     "manuals/9front/1"
                 ]
@@ -29,20 +30,21 @@ class ManualsModule(Module):
 
     """
 
+    config_key = 'manuals'
+
     def make_processor(self, macro):
         def processor(content, *args, **kwargs):
             return troff_to_txt(content, macro)
         return processor
 
+    def get_macro(self, build):
+        for macro, patterns in self.config_get('macros', []).items():
+            for pattern in patterns:
+                if fnmatch.fnmatch(build.input_path, pattern):
+                    return macro
+        return ValueError('macro not found for %s', build.input_path)
+
     def execute(self, build):
-        for build in builds:
-            for macro, paths in self.config_get('manuals', []).items():
-                for path in paths:
-                    # make sure that we don't match files by accident
-                    # eg file /path/dir.ext would match with dir /path/dir
-                    if not path.endswith(os.sep):
-                        path += os.sep
-                    pre = os.path.commonprefix([build.input_path, path])
-                    if pre == path:
-                        processor = self.make_processor(macro)
-                        build.processors.append(processor)
+        macro = self.get_macro(build)
+        processor = self.make_processor(macro)
+        build.processors.append(processor)

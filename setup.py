@@ -12,6 +12,7 @@ setup(
         'Jinja2',
         'Markdown',
         'Click',
+        'tqdm'
     ],
     entry_points='''
         [console_scripts]

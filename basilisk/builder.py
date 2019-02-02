@@ -1,6 +1,7 @@
 import logging
 import os
 import fnmatch
+import tqdm
 from .build import Build
 from .config import Config
 from .exceptions import BuildException
@@ -39,10 +40,13 @@ class Builder(object):
     }
 
     def __init__(self, source_directory, output_directory,
-                 config_file='_config.json'):
+                 config_file='_config.json',
+                 progress=False):
         self.source_directory = source_directory
         self.output_directory = output_directory
         self.test_directories()
+
+        self.progress = progress
 
         # Path to the config file. This file will be loaded from the source
         # directory.
@@ -193,23 +197,23 @@ class Builder(object):
         builds = [build for build in self.builds_generator()]
 
         logger.info('Preprocessing builds')
-        for module in self.iter_global_modules():
+        for module in tqdm.tqdm(self.iter_global_modules(), disable=not self.progress):
             logger.debug('Preprocessing using %s', module)
             module.preprocess(builds)
 
         logger.info('Processing builds')
-        for build in builds:
+        for build in tqdm.tqdm(builds, disable=not self.progress):
             logger.debug('Processing %s', build)
             for module in self.iter_build_modules(build):
                 logger.debug('Processing using %s', module)
                 module.execute(build)
 
         logger.info('Postprocessing builds')
-        for module in self.iter_global_modules():
+        for module in tqdm.tqdm(self.iter_global_modules(), disable=not self.progress):
             logger.debug('Postprocessing using %s', module)
             module.postprocess(builds)
 
         logger.info('Building')
-        for build in builds:
+        for build in tqdm.tqdm(builds, disable=not self.progress):
             logger.debug('Building %s', build)
             build.execute(self.config, self.source_directory, self.output_directory)
