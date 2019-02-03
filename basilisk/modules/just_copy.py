@@ -8,16 +8,7 @@ class JustCopyModule(Module):
     """Copies files that have paths ending with specified strings instead of
     building them.
     
-    Example config:
-
-        {
-            "just_copy": [
-                ".html",
-                "robots.txt",
-                "path/to/file.html"
-            ]
-        }
-
+    This module doesn't require any additional configuration.
     """
 
     def make_method(self, build):

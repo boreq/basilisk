@@ -1,5 +1,6 @@
 import os
 import subprocess
+import fnmatch
 from . import Module
 
 
@@ -11,15 +12,15 @@ class ExecWithModule(Module):
     Example config:
 
         {
-            "exec": {
-                ".py": "python %s",
-                ".sh": "bash %s"
+            "mapping": {
+                "*.py": "python %s",
+                "*.sh": "bash %s"
             }
         }
 
     """
 
-    priority = -20
+    config_key = 'exec_with'
 
     def make_read_function(self, command):
         def read(path):
@@ -35,14 +36,12 @@ class ExecWithModule(Module):
 
         path: Path to the file relative to the source directory root.
         """
-        for ext, command in self.builder.config.get('exec', {}).items():
-            if path.endswith(ext):
+        for pattern, command in self.config_get('mapping', {}).items():
+            if fnmatch.fnmatch(path, pattern):
                 return command
-        return None
+        return ValueError('exec_with mapping not found: %s' % path )
 
-    def execute(self, builds):
-        for build in builds:
-            command = self.should_exec_with(build.input_path)
-            if command is not None:
-                read = self.make_read_function(command)
-                build.read = read
+    def execute(self, build):
+        command = self.should_exec_with(build.input_path)
+        read = self.make_read_function(command)
+        build.read = read

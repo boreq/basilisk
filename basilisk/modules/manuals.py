@@ -23,7 +23,7 @@ class ManualsModule(Module):
         {
             "macros": {
                 "man": [
-                    "manuals/9front/1"
+                    "manuals/9front/1/*"
                 ]
             }
         }

@@ -15,6 +15,5 @@ class MarkdownModule(Module):
         return processor
 
     def execute(self, build):
-        if build.input_path.endswith('.md'):
-            processor = self.make_processor()
-            build.processors.append(processor)
+        processor = self.make_processor()
+        build.processors.append(processor)
