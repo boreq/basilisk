@@ -37,11 +37,11 @@ class ManualsModule(Module):
         return processor
 
     def get_macro(self, build):
-        for macro, patterns in self.config_get('macros', []).items():
+        for macro, patterns in self.config_get('macros', {}).items():
             for pattern in patterns:
                 if fnmatch.fnmatch(build.input_path, pattern):
                     return macro
-        return ValueError('macro not found for %s', build.input_path)
+        raise KeyError('macro not found for %s', build.input_path)
 
     def execute(self, build):
         macro = self.get_macro(build)
