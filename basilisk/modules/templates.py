@@ -1,6 +1,6 @@
 import os
 from ..module import Module
-from ...templates import Jinja2Templates
+from ..templates import Jinja2Templates
 
 
 class TemplatesModule(Module):

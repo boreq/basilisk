@@ -117,7 +117,7 @@ class Builder(object):
         module_name: a name of the module.
         """
         try:
-            import_name = 'basilisk.modules.builtin.' + module_name
+            import_name = 'basilisk.modules.' + module_name
             module_class = import_by_name(import_name)
         except:
             # TODO: try load an external module.
