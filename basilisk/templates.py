@@ -54,7 +54,7 @@ class BaseTemplates(object):
         context: dictionary which should be used as context while rendering
                  the template.
         """
-        raise NotImplemented()
+        raise NotImplementedError
 
     def render(self, path, context):
         """Called during the build to render templates.
@@ -65,7 +65,7 @@ class BaseTemplates(object):
         for template_path in self._template_name_generator(path):
             try:
                 return self._render_template(template_path, context)
-            except self.not_found_exception as e:
+            except self.not_found_exception:
                 pass
         raise TemplateRenderException('Could not render %s. No templates.' % path)
 

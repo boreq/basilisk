@@ -1,4 +1,3 @@
-import os
 import subprocess
 import fnmatch
 from ..module import Module
