@@ -1,5 +1,5 @@
 import markdown
-from . import Module
+from ..module import Module
 
 
 class MarkdownModule(Module):

@@ -1,6 +1,6 @@
 import os
-from . import Module
-from ..build import Build
+from ..module import Module
+from ...build import Build
 
 
 class DummyBuild(Build):

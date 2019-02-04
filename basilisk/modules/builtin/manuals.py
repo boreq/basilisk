@@ -1,7 +1,7 @@
 import os
 import subprocess
 import fnmatch
-from . import Module
+from ..module import Module
 
 
 def troff_to_txt(text, macro='man'):

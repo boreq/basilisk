@@ -1,7 +1,7 @@
 import os
 import subprocess
 import fnmatch
-from . import Module
+from ..module import Module
 
 
 

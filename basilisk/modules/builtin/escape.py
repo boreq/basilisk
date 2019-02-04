@@ -1,5 +1,5 @@
 import html
-from . import Module
+from ..module import Module
 
 
 class EscapeModule(Module):

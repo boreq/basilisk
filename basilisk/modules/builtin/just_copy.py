@@ -1,7 +1,7 @@
 import os
 import shutil
 import types
-from . import Module
+from ..module import Module
 
 
 class JustCopyModule(Module):

@@ -1,5 +1,5 @@
 import os
-from . import Module
+from ..module import Module
 
 
 class PrettyUrlsModule(Module):
