@@ -59,13 +59,12 @@ def list_modules():
     """Displays a list of all built in modules."""
     found_modules = []
     from . import modules
+    from .module import Module
     for key in dir(modules):
         if not key.startswith('_'):
             v = getattr(modules, key)
-            if issubclass(v, modules.Module) and \
-               v is not modules.Module:
-                found_modules.append((key, v.priority))
+            if issubclass(v, Module) and v is not Module:
+                found_modules.append(key)
 
-    print('Priority', 'Name')
-    for name, priority in sorted(found_modules, key=lambda v: v[1]):
-        print('{priority:>8} {name}' .format(priority=priority, name=name))
+    for name in sorted(found_modules):
+        print('{name}'.format(name=name))
