@@ -39,7 +39,7 @@ class ExecWithModule(Module):
         for pattern, command in self.config_get('mapping', {}).items():
             if fnmatch.fnmatch(path, pattern):
                 return command
-        return ValueError('exec_with mapping not found: %s' % path )
+        raise KeyError('exec_with mapping not found: %s' % path )
 
     def execute(self, build):
         command = self.should_exec_with(build.input_path)
