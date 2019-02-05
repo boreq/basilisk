@@ -20,7 +20,7 @@ class Build(object):
         # input file before saving it in the output file. Think about this in
         # terms of running the input through a series of pipes.
         # Expected function signature:
-        # str processor(str content, dict context)
+        # processor(content: str, context: dict) -> str
         self.processors = []
 
         # Additional context which will be passed to processors.
