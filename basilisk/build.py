@@ -40,9 +40,9 @@ class Build(object):
 
             parameter_name: value
 
-        Parameters defined like that are passed in the to the processors in the
-        context as a dictionary called `parameters` with names of the parameters
-        as keys.
+        Parameters defined like that are passed to the processors in the
+        context as a dictionary called `parameters` with names of the
+        parameters as keys.
 
         line: string.
         """
@@ -53,7 +53,7 @@ class Build(object):
         return {}
 
     def read(self, path):
-        """Reads and returns the content of the input file.
+        """Reads and returns the lines of the input file.
 
         path: absolute path to the input file.
         """
@@ -67,11 +67,13 @@ class Build(object):
     def parse_lines(self, lines):
         """Parses the lines (presumably from the input file). First lines
         containing the ':' characters are intepreted as `key: value` pairs.
-        Those pais populate the second field of the returned tuple. Everything
+        Those pairs populate the second field of the returned tuple. Everything
         else after those `key: value` pairs is considered to be the  content of
         the file and returned as the first element of a tuple. Parameters must
         be separated from content with a blank line or the first line of content
         can't contain a ':' character.
+
+        lines: a list of strings (most likely lines loaded from the input file).
         """
         parameters = {}
         content = ''
@@ -94,8 +96,7 @@ class Build(object):
     def write(self, output_directory, content):
         """Writes content to the output file.
 
-        content: This will be written to the output file, most likely a result
-                 of template rendering.
+        content: This will be written to the output file.
         """
         path = os.path.join(output_directory, self.output_path)
         directory = os.path.dirname(path)
