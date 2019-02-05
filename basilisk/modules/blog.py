@@ -101,12 +101,9 @@ class BlogModule(Module):
     def create_entry(self, build, blog_directory):
         # Here we have to cheat a little to get the params by reading the
         # file at this point.
-        if not getattr(build, 'just_copy', False):
-            inpath = os.path.join(self.builder.source_directory, build.input_path)
-            lines = build.read(inpath)
-            content, parameters = build.parse_lines(lines)
-        else:
-            parameters = []
+        inpath = os.path.join(self.builder.source_directory, build.input_path)
+        lines = build.read(inpath)
+        content, parameters = build.parse_lines(lines)
 
         path = self.get_relative_path(build, blog_directory)
         relative_path = self.get_relative_path_tail(build, blog_directory)
