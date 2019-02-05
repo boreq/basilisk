@@ -31,6 +31,9 @@ class Module(object):
         return self._logger
 
     def config_get(self, key, default=_sentinel):
+        """Returns a key from the config defined for this module in the config
+        file. To use this method define self.config_key.
+        """
         try:
             return self.builder.config['module_config'][self.config_key][key]
         except KeyError:
@@ -51,20 +54,20 @@ class Module(object):
     def preprocess(self, builds):
         """Executes a preprocessing step.
 
-        builds: List of Build objects.
+        builds: list containing Build objects.
         """
         pass
 
     def postprocess(self, builds):
         """Executes a postprocessing step.
 
-        builds: List of Build objects.
+        builds: list containing Build objects.
         """
         pass
 
     def execute(self, build):
-        """Runs a module on a build.
+        """Runs this module on a build.
 
-        builds: List of Build objects.
+        build: a Build object.
         """
         pass
