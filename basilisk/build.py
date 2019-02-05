@@ -2,7 +2,7 @@ import logging
 import os
 
 
-logger = logging.getLogger('builder')
+logger = logging.getLogger('build')
 
 
 class Build(object):
