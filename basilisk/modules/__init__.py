@@ -19,6 +19,9 @@ manuals = _ManualsModule
 from .markdown import MarkdownModule as _MarkdownModule
 markdown = _MarkdownModule
 
+from .minify_html import MinifyHtmlModule as _MinifyHtmlModule
+minify_html = _MinifyHtmlModule
+
 from .pretty_urls import PrettyUrlsModule as _PrettyUrlsModule
 pretty_urls = _PrettyUrlsModule
 

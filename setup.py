@@ -12,7 +12,8 @@ setup(
         'Jinja2',
         'Markdown',
         'Click',
-        'tqdm'
+        'tqdm',
+        'htmlmin'
     ],
     entry_points='''
         [console_scripts]
