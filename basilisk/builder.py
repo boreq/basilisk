@@ -172,8 +172,6 @@ class Builder(object):
         scanned. For each file a build object is created and the output path is
         set to the relative path in the source directory with the extension
         changed to '.html'.
-
-        If a file is marked as 'just copy' the extension will not be changed.
         """
         base_path_length = len(self.source_directory) + 1
 
