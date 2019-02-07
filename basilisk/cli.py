@@ -1,6 +1,7 @@
 import click
 import logging
 from .builder import Builder
+from .server import Server
 from .helpers import import_by_name
 
 
@@ -11,13 +12,11 @@ logger = logging.getLogger('cli')
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
-@click.option('--progress/--no-progress', default=False)
 @click.pass_context
-def cli(ctx, debug, progress):
+def cli(ctx, debug):
     """Basilisk is a static website generator."""
     ctx.obj = {
-        'DEBUG': debug,
-        'PROGRESS': progress,
+        'DEBUG': debug
     }
     log_format = (debug and DEBUG_LOG_FORMAT) or LOG_FORMAT
     log_level = (debug and logging.DEBUG) or logging.INFO
@@ -27,16 +26,32 @@ def cli(ctx, debug, progress):
 @cli.command()
 @click.argument('source_directory', type=click.Path(exists=False, resolve_path=True))
 @click.argument('output_directory', type=click.Path(resolve_path=True))
+@click.option('--progress/--no-progress', default=False)
 @click.pass_context
-def build(ctx, source_directory, output_directory):
-    """Builds a project."""
+def build(ctx, source_directory, output_directory, progress):
+    """Builds your website into the output directory."""
     try:
-        builder = Builder(source_directory, output_directory, progress=ctx.obj['PROGRESS'])
+        builder = Builder(source_directory, output_directory, progress=progress)
         builder.run()
     except Exception as e:
         logger.critical(e)
         if ctx.obj['DEBUG']:
             raise
+
+
+@cli.command()
+@click.argument('source_directory', type=click.Path(exists=False, resolve_path=True))
+@click.pass_context
+def serve(ctx, source_directory):
+    """Builds and serves your website, rebuilding on file changes."""
+    try:
+        server = Server(source_directory)
+        server.run()
+    except Exception as e:
+        logger.critical(e)
+        if ctx.obj['DEBUG']:
+            raise
+
 
 @cli.command()
 @click.argument('module_name')

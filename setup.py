@@ -13,7 +13,8 @@ setup(
         'Markdown',
         'Click',
         'tqdm',
-        'htmlmin'
+        'htmlmin',
+        'watchdog'
     ],
     entry_points='''
         [console_scripts]
