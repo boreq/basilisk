@@ -1,0 +1,44 @@
+import subprocess
+from ..module import Module
+
+
+class ScriptingModule(Module):
+    """Executes scripts during the build process. This can allow you to
+    implement extra build steps, for example building CSS or JS files.
+    Additional variables can be injected as script parameters using two
+    placeholder names `${source_directory}` and `${output_directory}`. Those
+    will be replaced with proper paths during script execution using simple
+    string replacement. The scripts added to the list will be executed before
+    compiling the actual project every time you run `basilisk build` or
+    `basilisk serve`.
+
+    Example config:
+
+        {
+            "scripts": [
+                "./path_to_your_script.sh",
+                "./script.sh ${source_directory} ${output_directory}"
+            ]
+        }
+
+    """
+
+    config_key = 'scripting'
+
+    def get_scripts(self):
+        return self.config_get('scripts', [])
+
+    def replace_placeholders(self, command):
+        command = command.replace('${source_directory}', self.builder.source_directory)
+        command = command.replace('${output_directory}', self.builder.output_directory)
+        return command
+
+    def run_script(self, command):
+        r = subprocess.run(command, shell=True)
+        r.check_returncode()
+
+    def preprocess(self, builds):
+        for command in self.get_scripts():
+            command = self.replace_placeholders(command)
+            self.logger.debug('Running: {}'.format(command))
+            self.run_script(command)

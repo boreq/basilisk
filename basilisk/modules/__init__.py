@@ -25,5 +25,8 @@ minify_html = _MinifyHtmlModule
 from .pretty_urls import PrettyUrlsModule as _PrettyUrlsModule
 pretty_urls = _PrettyUrlsModule
 
+from .scripting import ScriptingModule as _ScriptingModule
+scripting = _ScriptingModule
+
 from .templates import TemplatesModule as _TemplatesModule
 templates = _TemplatesModule
