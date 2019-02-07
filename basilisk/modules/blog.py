@@ -95,7 +95,7 @@ class BlogModule(Module):
     def blog_directories(self):
         directories = self.config_get('directories', [])
         if len(directories) == 0:
-            self.logger.warning('no blog directories defined, did you configure this module?')
+            self.logger.warning('no blog directories defined, did you configure "blog"?')
         return directories
 
     def create_entry(self, build, blog_directory):

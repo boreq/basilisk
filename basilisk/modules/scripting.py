@@ -28,7 +28,7 @@ class ScriptingModule(Module):
     def get_scripts(self):
         scripts = self.config_get('scripts', [])
         if len(scripts) == 0:
-            self.logger.warning('no scripts defined, did you configure this module?')
+            self.logger.warning('no scripts defined, did you configure "scripting"?')
         return scripts
 
     def replace_placeholders(self, command):
