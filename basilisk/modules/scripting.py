@@ -26,7 +26,10 @@ class ScriptingModule(Module):
     config_key = 'scripting'
 
     def get_scripts(self):
-        return self.config_get('scripts', [])
+        scripts = self.config_get('scripts', [])
+        if len(scripts) == 0:
+            self.logger.warning('no scripts defined, did you configure this module?')
+        return scripts
 
     def replace_placeholders(self, command):
         command = command.replace('${source_directory}', self.builder.source_directory)
