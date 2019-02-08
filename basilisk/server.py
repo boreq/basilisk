@@ -58,13 +58,36 @@ class Server(object):
         self.host = host
         self.port = port
 
+    def create_text_frame(self, text):
+        """Creates a nice frame for the text:
+        
+            #======================#
+            #                      #
+            # Your text goes here! #
+            #                      #
+            #======================#
+
+        Returns a list of strings containing the frame lines.
+
+        text: a string.
+        """
+        length = len(text)
+        frame_edge = '=' * (length + 4)
+        frame_padding = '#' + ' ' * (length + 2) + '#' 
+        lines = [
+                frame_edge,
+                frame_padding,
+                '# ' + text + ' #',
+                frame_padding,
+                frame_edge,
+        ]
+        return lines
+
     def run(self):
-        logger.info('=' * 20)
-        logger.info('')
-        logger.info('Starting server on http://{}:{}'.format(self.host, self.port))
-        logger.info('')
-        logger.info('=' * 20)
-            
+        text = 'Starting development server on http://{}:{}'.format(self.host, self.port)
+        for line in self.create_text_frame(text):
+            logger.info(line)
+
         with tempfile.TemporaryDirectory() as tmp_directory:
             logger.info('Created temporary directory: %s' % tmp_directory)
 
@@ -110,3 +133,4 @@ class Server(object):
         handler = create_handler(directory_path)
         with socketserver.TCPServer(server_address, handler) as httpd:
             httpd.serve_forever()
+
