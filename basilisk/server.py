@@ -7,6 +7,7 @@ import bs4
 import time
 import flask
 import os
+import traceback
 from werkzeug import serving
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -223,8 +224,12 @@ class Server(object):
                     self.compile(tmp_directory, status)
 
     def compile(self, tmp_directory, status):
-        remove_directory_contents(tmp_directory)
-        builder = Builder(self.source_directory, tmp_directory)
-        builder.run()
-        status['compilationTimestamp'] = time.time()
-        logger.info('Compiled!')
+        try:
+            remove_directory_contents(tmp_directory)
+            builder = Builder(self.source_directory, tmp_directory)
+            builder.run()
+            status['compilationTimestamp'] = time.time()
+            logger.info('Compiled!')
+        except:
+            logger.error('Compilation failed!')
+            traceback.print_exc()
