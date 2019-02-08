@@ -2,8 +2,12 @@ import threading
 import tempfile
 import logging
 import datetime
-import socketserver
-from http.server import SimpleHTTPRequestHandler
+import io
+import bs4
+import time
+import flask
+import os
+from werkzeug import serving
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from .builder import Builder
@@ -13,14 +17,105 @@ from .helpers import remove_directory_contents
 logger = logging.getLogger('server')
 
 
-def create_handler(directory_path):
+script =  """
+    function basilisk() {
+        var lastCompilationTimestamp;
 
-    class RequestHandler(SimpleHTTPRequestHandler):
+        function responseListener() {
+          var compilationTimestamp = this.response.compilationTimestamp;
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, directory=directory_path, **kwargs)
+          if (lastCompilationTimestamp && compilationTimestamp !== lastCompilationTimestamp) {
+              location.reload(true);
+          }
 
-    return RequestHandler
+          lastCompilationTimestamp = compilationTimestamp;
+          setTimeout(doRequest, 1000);
+        }
+
+        function doRequest() {
+            var request = new XMLHttpRequest();
+            request.addEventListener("load", responseListener);
+            request.open("GET", "/basilisk-status.json");
+            request.responseType = 'json';
+            request.send();
+        }
+
+        doRequest();
+    };
+
+    basilisk();
+"""
+
+
+def create_script_tag(soup):
+    """Creates a <script> tag containing a script which auto refreshes the
+    website after the project is rebuilt.
+    """
+    script_tag = soup.new_tag('script')
+    script_tag.string = script
+    return script_tag
+
+
+def inject_script(bufferedReader):
+    """Injects a script into the body of all html files. This script makes the
+    website automatically reload itself after changes are detected. This is
+    done using polling.
+    """
+    content = bufferedReader.read()
+    soup = bs4.BeautifulSoup(content, features='html.parser')
+    if soup.body:
+        script_tag = create_script_tag(soup)
+        soup.body.append(script_tag)
+        content = str(soup).encode('utf-8')
+    return io.BytesIO(content)
+
+
+def iter_file_paths(path):
+    if os.path.isfile(path):
+        yield path
+    yield os.path.join(path, 'index.html')
+    yield os.path.join(path, 'index.htm')
+
+
+def create_app(directory_path, status):
+    
+    app = flask.Flask(__name__, static_folder=None)
+
+    import logging
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.WARNING)
+
+    @app.route('/basilisk-status.json')
+    def route_status():
+        return flask.jsonify(status)
+
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def route_file(path):
+        path = flask.safe_join(directory_path, path)
+        for file_path in iter_file_paths(path):
+            if os.path.exists(file_path):
+                f = open(file_path, 'rb')
+                if f.name.endswith('.html') or f.name.endswith('.htm'):
+                    f = inject_script(f)
+                return flask.send_file(f, attachment_filename=file_path)
+
+        logger.warning('Server: file not found: {}'.format(path))
+        flask.abort(404)
+    return app
+
+
+class ServerThread(threading.Thread):
+
+    def __init__(self, app, host, port):
+        threading.Thread.__init__(self)
+        self.srv = serving.make_server(host, port, app)
+
+    def run(self):
+        self.srv.serve_forever()
+
+    def shutdown(self):
+        self.srv.shutdown()
 
 
 class EventHandler(FileSystemEventHandler):
@@ -91,24 +186,30 @@ class Server(object):
         with tempfile.TemporaryDirectory() as tmp_directory:
             logger.info('Created temporary directory: %s' % tmp_directory)
 
-            serve = lambda: self.serve(tmp_directory)
-            t = threading.Thread(target=serve)
-            t.daemon = True
-            t.start()
+            status = {}
 
-            self.compile(tmp_directory)
+            self.compile(tmp_directory, status)
+
+            app = create_app(tmp_directory, status)
+            server = ServerThread(app, self.host, self.port)
+            server.start()
 
             event_handler = EventHandler()
             observer = Observer()
             observer.schedule(event_handler, self.source_directory, recursive=True)
             observer.start()
             try:
-                self.watch_events(event_handler, tmp_directory)
+                self.watch_events(event_handler, tmp_directory, status)
             except KeyboardInterrupt:
+                pass
+            finally:
+                logger.info('Cleaning up')
                 observer.stop()
+                server.shutdown()
+                server.join()
             observer.join()
 
-    def watch_events(self, event_handler, tmp_directory):
+    def watch_events(self, event_handler, tmp_directory, status):
         last_event = None
         while True:
             if event_handler.received_event.wait(timeout=self.event_timeout):
@@ -119,18 +220,11 @@ class Server(object):
                 time_passed = datetime.datetime.now() - last_event
                 if time_passed > datetime.timedelta(seconds=self.event_debounce):
                     last_event = None
-                    self.compile(tmp_directory)
+                    self.compile(tmp_directory, status)
 
-    def compile(self, tmp_directory):
-        logger.info('Compiling...')
+    def compile(self, tmp_directory, status):
         remove_directory_contents(tmp_directory)
         builder = Builder(self.source_directory, tmp_directory)
         builder.run()
+        status['compilationTimestamp'] = time.time()
         logger.info('Compiled!')
-
-    def serve(self, directory_path):
-        server_address = (self.host, self.port)
-        handler = create_handler(directory_path)
-        with socketserver.TCPServer(server_address, handler) as httpd:
-            httpd.serve_forever()
-

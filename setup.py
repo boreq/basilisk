@@ -14,7 +14,9 @@ setup(
         'Click',
         'tqdm',
         'htmlmin',
-        'watchdog'
+        'watchdog',
+        'beautifulsoup4',
+        'flask'
     ],
     entry_points='''
         [console_scripts]
