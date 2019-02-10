@@ -10,6 +10,9 @@ exec_with = _ExecWithModule
 from .just_copy import JustCopyModule as _JustCopyModule
 just_copy = _JustCopyModule
 
+from .list_headers import ListHeadersModule as _ListHeadersModule
+list_headers = _ListHeadersModule
+
 from .listing import ListingModule as _ListingModule
 listing = _ListingModule
 

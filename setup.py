@@ -16,7 +16,8 @@ setup(
         'htmlmin',
         'watchdog',
         'beautifulsoup4',
-        'flask'
+        'flask',
+        'python-slugify'
     ],
     entry_points='''
         [console_scripts]
