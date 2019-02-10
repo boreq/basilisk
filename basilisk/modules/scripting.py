@@ -40,7 +40,7 @@ class ScriptingModule(Module):
         r = subprocess.run(command, shell=True)
         r.check_returncode()
 
-    def preprocess(self, builds):
+    def process(self, builds):
         for command in self.get_scripts():
             command = self.replace_placeholders(command)
             self.logger.debug('Running: {}'.format(command))

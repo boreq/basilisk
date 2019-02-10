@@ -21,11 +21,12 @@ def test_preprocessing_and_postprocessing(builder):
         ExpectedDummyBuild('2019', None, None),
     ]
 
-    builds = [Build(path, path) for path in build_paths]
-    for build in builds:
+    for path in build_paths:
+        build = Build(path, path)
         def read(*args, **kwargs):
             return ''
         build.read = read
+        builder.add_build(build)
 
     builder.config['module_config']['blog'] = {
         'directories': [
@@ -39,8 +40,11 @@ def test_preprocessing_and_postprocessing(builder):
 
     module = BlogModule()
     module.builder = builder
-    module.preprocess(builds)
-    assert len(builds) == len(build_paths) + len(expected_dummy_builds)
+    while builder.builds_modified:
+        builder.builds_modified = False
+        module.process(iter(builder.builds))
+
+    assert len(builder.builds) == len(build_paths) + len(expected_dummy_builds)
 
     def find_build(expected_dummy_build, builds):
         for build in builds:
@@ -52,10 +56,8 @@ def test_preprocessing_and_postprocessing(builder):
         return None
 
     for expected_dummy_build in expected_dummy_builds:
-        build = find_build(expected_dummy_build, builds)
+        build = find_build(expected_dummy_build, builder.builds)
         assert build is not None
-
-    module.postprocess(builds)
 
     ExpectedListing = collections.namedtuple('ExpectedListing', ['path', 'relative_path'])
     expected_listings = [
@@ -71,8 +73,8 @@ def test_preprocessing_and_postprocessing(builder):
                 return entry
         return None
 
-    listing = builds[0].additional_context['blog']['blog_name']['listing']
-    tree = builds[0].additional_context['blog']['blog_name']['tree']
+    listing = builder.builds[0].additional_context['blog']['blog_name']['listing']
+    tree = builder.builds[0].additional_context['blog']['blog_name']['tree']
 
     for element in listing:
         print(element)

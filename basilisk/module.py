@@ -51,17 +51,12 @@ class Module(object):
         """
         self.builder = builder
 
-    def preprocess(self, builds):
-        """Executes a preprocessing step.
+    def process(self, builds):
+        """Process builds using this module. This method can be called multiple
+        times so modules which create builds should make sure that each of them
+        is created only once.
 
-        builds: list containing Build objects.
-        """
-        pass
-
-    def postprocess(self, builds):
-        """Executes a postprocessing step.
-
-        builds: list containing Build objects.
+        builds: iterator returning Build objects.
         """
         pass
 

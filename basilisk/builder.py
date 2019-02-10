@@ -189,29 +189,33 @@ class Builder(object):
                 logger.debug('Yielding object: %s', build)
                 yield build
 
+    def add_build(self, build):
+        for module in self.iter_build_modules(build):
+            logger.debug('Processing using %s', module)
+            module.execute(build)
+        self.builds_modified = True
+        self.builds.append(build)
+
+    def with_progress_bar(self, iterable):
+        return tqdm.tqdm(iterable, disable=not self.progress, leave=False)
+
     def run(self):
         """This is the main function which should be executed to run a build."""
+        self.builds = []
+        self.builds_modified = False
+
         logger.info('Scanning files')
-        builds = [build for build in self.builds_generator()]
+        for build in self.builds_generator():
+            self.add_build(build)
 
-        logger.info('Preprocessing builds')
-        for module in tqdm.tqdm(self.iter_global_modules(), disable=not self.progress):
-            logger.debug('Preprocessing using %s', module)
-            module.preprocess(builds)
-
-        logger.info('Processing builds')
-        for build in tqdm.tqdm(builds, disable=not self.progress):
-            logger.debug('Processing %s', build)
-            for module in self.iter_build_modules(build):
+        while self.builds_modified:
+            logger.info('Processing builds')
+            self.builds_modified = False
+            for module in self.with_progress_bar(self.iter_global_modules()):
                 logger.debug('Processing using %s', module)
-                module.execute(build)
-
-        logger.info('Postprocessing builds')
-        for module in tqdm.tqdm(self.iter_global_modules(), disable=not self.progress):
-            logger.debug('Postprocessing using %s', module)
-            module.postprocess(builds)
+                module.process(iter(self.builds))
 
         logger.info('Building')
-        for build in tqdm.tqdm(builds, disable=not self.progress):
+        for build in self.with_progress_bar(self.builds):
             logger.debug('Building %s', build)
             build.execute(self.config, self.source_directory, self.output_directory)

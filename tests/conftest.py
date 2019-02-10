@@ -14,6 +14,12 @@ class MockBuilder(object):
         }
         self.source_directory = source_directory
         self.output_directory = output_directory
+        self.builds = []
+        self.builds_modified = False
+
+    def add_build(self, build):
+        self.builds_modified = True
+        self.builds.append(build)
 
 
 @pytest.fixture

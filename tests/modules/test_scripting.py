@@ -7,7 +7,7 @@ from basilisk.build import Build
 def test_no_config(builder):
     module = ScriptingModule()
     module.builder = builder
-    module.preprocess(None)
+    module.process(None)
 
 
 def test_command(builder):
@@ -16,7 +16,7 @@ def test_command(builder):
     }
     module = ScriptingModule()
     module.builder = builder
-    module.preprocess(None)
+    module.process(None)
 
 
 def test_invalid_command(builder):
@@ -26,7 +26,7 @@ def test_invalid_command(builder):
     module = ScriptingModule()
     module.builder = builder
     with pytest.raises(subprocess.CalledProcessError):
-        module.preprocess(None)
+        module.process(None)
 
 
 def test_replacement(builder):

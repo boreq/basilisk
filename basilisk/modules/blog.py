@@ -92,6 +92,10 @@ class BlogModule(Module):
 
     config_key = 'blog'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.created_builds = []
+
     def blog_directories(self):
         directories = self.config_get('directories', [])
         if len(directories) == 0:
@@ -164,22 +168,42 @@ class BlogModule(Module):
             return head
         return path
 
-    def insert_dummy_builds(self, builds, blog_directory, tree):
+    def dummy_build_was_created(self, blog_directory, year, month, day):
+        for build_blog_directory, build_year, build_month, build_day in self.created_builds:
+            if blog_directory == build_blog_directory and \
+                year == build_year and \
+                month == build_month and \
+                day == build_day:
+                    return True
+        return False
+
+    def register_dummy_build_creation(self, blog_directory, year, month, day):
+        self.created_builds.append((blog_directory, year, month, day))
+
+    def iterate_date_tuples(self, tree_listing):
+        for year in tree_listing:
+            yield (year, None, None)
+            for month in tree_listing[year]:
+                yield (year, month, None)
+                for day in tree_listing[year][month]:
+                    yield (year, month, day)
+
+    def insert_dummy_builds(self, builds, blog_directory, tree_listing):
         """Creates dummy builds so that directory listings could be created in
         the templates.
         """
-        for year in tree:
-            d = os.path.join(blog_directory['directory'], year, 'index.html')
-            build = DummyBuild(d, d, year, None, None)
-            builds.append(build)
-            for month in tree[year]:
-                d = os.path.join(blog_directory['directory'], year, month, 'index.html')
-                build = DummyBuild(d, d, year, month, None)
-                builds.append(build)
-                for day in tree[year][month]:
-                    d = os.path.join(blog_directory['directory'], year, month, day, 'index.html')
-                    build = DummyBuild(d, d, year, month, day)
-                    builds.append(build)
+        for year, month, day in self.iterate_date_tuples(tree_listing):
+            if not self.dummy_build_was_created(blog_directory, year, month, day):
+                path_elements = [blog_directory['directory'], year]
+                if month is not None:
+                    path_elements.append(month)
+                if day is not None:
+                    path_elements.append(day)
+                path_elements.append('index.html')
+                d = os.path.join(*path_elements)
+                build = DummyBuild(d, d, year, month, day)
+                self.builder.add_build(build)
+                self.register_dummy_build_creation(blog_directory, year, month, day)
 
     def insert_into_tree_listing(self, tree_listing, entry):
         y = entry['date']['year']
@@ -219,29 +243,14 @@ class BlogModule(Module):
         build.additional_context['blog'][blog_directory['name']]['tree'] = tree_listing
 
     def is_in_blog_directory(self, build, blog_directory):
+        """Returns True if the build resides in the blog directory (is part of
+        the given blog).
+        """
         paths = [build.output_path, blog_directory['directory']]
         prefix = os.path.commonprefix(paths)
         return prefix == blog_directory['directory']
 
-    def preprocess(self, builds):
-        for blog_directory in self.blog_directories():
-            if blog_directory.get('insert_dummy_builds', False):
-                # Insert dummy builds to create directory listings under
-                # .../year, .../year/month, and .../year/month/day.
-                tree = {}
-                for build in builds:
-                    if self.is_in_blog_directory(build, blog_directory):
-                        date = self.extract_date_components(build, blog_directory)
-                        if date is not None:
-                            y, m, d = date
-                            if not y in tree:
-                                tree[y] = {}
-                            if not m in tree[y]:
-                                tree[y][m] = set()
-                            tree[y][m].add(d)
-                self.insert_dummy_builds(builds, blog_directory, tree)
-
-    def postprocess(self, builds):
+    def process(self, builds):
         for blog_directory in self.blog_directories():
             self.logger.debug('blog directory %s', blog_directory)
 
@@ -266,6 +275,8 @@ class BlogModule(Module):
                 # Put the created listing the the additional context of each
                 # build.
                 self.add_context(build, blog_directory, listing, tree_listing)
+
+            self.insert_dummy_builds(builds, blog_directory, tree_listing)
 
             # Sort the entires descending by date.
             self.sort_by_date(listing)
