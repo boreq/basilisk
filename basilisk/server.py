@@ -119,12 +119,23 @@ def create_app(directory_path, status):
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.WARNING)
 
+    from functools import update_wrapper
+
+    def nocache(f):
+        def new_func(*args, **kwargs):
+            resp = flask.make_response(f(*args, **kwargs))
+            resp.cache_control.no_cache = True
+            return resp
+        return update_wrapper(new_func, f)
+
     @app.route('/basilisk-status.json')
+    @nocache
     def route_status():
         return flask.jsonify(status)
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
+    @nocache
     def route_file(path):
         path = flask.safe_join(directory_path, path)
         for file_path in iter_file_paths(path):
