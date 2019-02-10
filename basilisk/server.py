@@ -71,6 +71,34 @@ def inject_script(bufferedReader):
     return io.BytesIO(content)
 
 
+def create_text_frame(text, character_horizontal='=', character_vertical='#'):
+    """Creates a nice frame for the text:
+    
+        #======================#
+        #                      #
+        # Your text goes here! #
+        #                      #
+        #======================#
+
+    Returns a list of strings containing the frame lines.
+
+    text: a string.
+    character_horizontal: a character used for horizontal lines.
+    character_vertical: a character used for vertical lines.
+    """
+    length = len(text)
+    frame_edge = character_horizontal * (length + 4)
+    frame_padding = character_vertical + ' ' * (length + 2) + character_vertical
+    lines = [
+            frame_edge,
+            frame_padding,
+            '{} {} {}'.format(character_vertical, text, character_vertical),
+            frame_padding,
+            frame_edge,
+    ]
+    return lines
+
+
 def iter_file_paths(path):
     if os.path.isfile(path):
         yield path
@@ -79,7 +107,12 @@ def iter_file_paths(path):
 
 
 def create_app(directory_path, status):
-    
+    """Creates a Flask app which serves files from the specified directory as
+    well as a special endpoint used by basilisk to check the compilation
+    status. Flask is used instead of using socketserver directly because of
+    some truly bizzare "address is already in use" errors that I encountered
+    when using it directly (despite freeing up resources on program shutdown).
+    """
     app = flask.Flask(__name__, static_folder=None)
 
     import logging
@@ -154,34 +187,10 @@ class Server(object):
         self.host = host
         self.port = port
 
-    def create_text_frame(self, text):
-        """Creates a nice frame for the text:
-        
-            #======================#
-            #                      #
-            # Your text goes here! #
-            #                      #
-            #======================#
-
-        Returns a list of strings containing the frame lines.
-
-        text: a string.
-        """
-        length = len(text)
-        frame_edge = '=' * (length + 4)
-        frame_padding = '#' + ' ' * (length + 2) + '#' 
-        lines = [
-                frame_edge,
-                frame_padding,
-                '# ' + text + ' #',
-                frame_padding,
-                frame_edge,
-        ]
-        return lines
 
     def run(self):
         text = 'Starting development server on http://{}:{}'.format(self.host, self.port)
-        for line in self.create_text_frame(text):
+        for line in create_text_frame(text):
             logger.info(line)
 
         with tempfile.TemporaryDirectory() as tmp_directory:
