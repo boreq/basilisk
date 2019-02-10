@@ -4,9 +4,10 @@ import types
 from ..module import Module
 
 
-class JustCopyModule(Module):
-    """Copies files that have paths ending with specified strings instead of
-    building them.
+class CopyModule(Module):
+    """Copies the files in the pipeline without modifying them in any way. You
+    most likely don't want to use any other modules in a pipline together with
+    this module.
     
     This module doesn't require any additional configuration.
     """

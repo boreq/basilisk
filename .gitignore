@@ -3,3 +3,4 @@ __pycache__/
 .cache/
 .mypy_cache/
 *.egg-info
+_misc/

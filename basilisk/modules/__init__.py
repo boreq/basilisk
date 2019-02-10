@@ -7,8 +7,8 @@ escape = _EscapeModule
 from .exec_with import ExecWithModule as _ExecWithModule
 exec_with = _ExecWithModule
 
-from .just_copy import JustCopyModule as _JustCopyModule
-just_copy = _JustCopyModule
+from .copy import CopyModule as _CopyModule
+copy = _CopyModule
 
 from .list_headers import ListHeadersModule as _ListHeadersModule
 list_headers = _ListHeadersModule
