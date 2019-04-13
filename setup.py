@@ -17,7 +17,8 @@ setup(
         'watchdog',
         'beautifulsoup4',
         'flask',
-        'python-slugify'
+        'python-slugify',
+        'feedgen'
     ],
     entry_points='''
         [console_scripts]

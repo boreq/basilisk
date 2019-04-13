@@ -1,6 +1,9 @@
 import os
+import datetime
+import urllib
 from ..module import Module
 from ..build import Build
+from feedgen.feed import FeedGenerator
 
 
 class DummyBuild(Build):
@@ -30,6 +33,65 @@ class DummyBuild(Build):
             return ['title: {}'.format(self.month)]
         if self.year:
             return ['title: {}'.format(self.year)]
+
+
+class FeedBuild(Build):
+
+    def __init__(self, input_path, output_path, blog_directory, listing):
+        super().__init__(input_path, output_path)
+        self.blog_directory = blog_directory
+        self.listing = listing
+
+    def get_feed(self):
+        feed = self.blog_directory['feed']
+        url = urllib.parse.urljoin(feed['base_url'], self.blog_directory['directory'])
+        self_url = urllib.parse.urljoin(feed['base_url'], self.output_path)
+
+        fg = FeedGenerator()
+        fg.id(url)
+        fg.title(feed['title'])
+        fg.link(href=url, rel='alternate')
+        fg.link(href=self_url, rel='self')
+        fg.description('An automatically generated feed.')
+
+        for entry in reversed(self.listing):
+            entry_url = urllib.parse.urljoin(url, entry['path'])
+            fe = fg.add_entry()
+            fe.id(entry_url)
+            fe.title(entry['parameters'].get('title', 'No title'))
+            fe.published(self.get_date(entry))
+            fe.link(href=entry_url)
+
+        return fg
+
+    def get_date(self, entry):
+        return datetime.datetime(
+            int(entry['date']['year']),
+            int(entry['date']['month']),
+            int(entry['date']['day']),
+            tzinfo=datetime.timezone.utc
+        )
+
+    def read(self, path):
+        return self.get_str().decode('utf-8').splitlines(True)
+
+
+class RssBuild(FeedBuild):
+
+    def __init__(self, input_path, output_path, blog_directory, listing):
+        super().__init__(input_path, output_path, blog_directory, listing)
+
+    def get_str(self):
+        return self.get_feed().rss_str(pretty=True)
+
+
+class AtomBuild(FeedBuild):
+
+    def __init__(self, input_path, output_path, blog_directory, listing):
+        super().__init__(input_path, output_path, blog_directory, listing)
+
+    def get_str(self):
+        return self.get_feed().atom_str(pretty=True)
 
 
 class BlogModule(Module):
@@ -83,7 +145,15 @@ class BlogModule(Module):
                 {
                     "name": "thoughts",
                     "directory": "thoughts/",
-                    "insert_dummy_builds": true
+                    "insert_dummy_builds": true,
+                    "feed": {
+                        "title": "Thoughts",
+                        "base_url": "https://example.com/",
+                        "files": {
+                            "rss": "thoughts/feed.rss",
+                            "atom": "thoughts/feed.atom"
+                        }
+                    }
                 }
             ]
         }
@@ -95,6 +165,7 @@ class BlogModule(Module):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.created_builds = []
+        self.created_feed_builds = []
 
     def blog_directories(self):
         directories = self.config_get('directories', [])
@@ -250,6 +321,32 @@ class BlogModule(Module):
         prefix = os.path.commonprefix(paths)
         return prefix == blog_directory['directory']
 
+    def insert_feed_builds(self, builds, blog_directory, listing):
+        """Creates feed builds."""
+        if 'feed' in blog_directory: 
+            for feed_type, feed_file in blog_directory['feed'].get('files', {}).items():
+                if not self.feed_build_was_created(blog_directory, feed_type):
+                    build = self.create_feed_build(feed_type, feed_file, blog_directory, listing)
+                    self.builder.add_build(build)
+                    self.register_feed_build_creation(blog_directory, feed_type)
+
+    def create_feed_build(self, feed_type, feed_file, blog_directory, listing):
+        if feed_type == 'rss':
+            return RssBuild(feed_file, feed_file, blog_directory, listing)
+        if feed_type == 'atom':
+            return AtomBuild(feed_file, feed_file, blog_directory, listing)
+        raise ValueError('Invalid feed type {}'.format(feed_type))
+
+    def feed_build_was_created(self, blog_directory, feed_type):
+        for build_blog_directory, build_feed_type in self.created_feed_builds:
+            if blog_directory['directory'] == build_blog_directory['directory'] \
+                and feed_type == build_feed_type:
+                return True
+        return False
+
+    def register_feed_build_creation(self, blog_directory, build_feed_type):
+        self.created_feed_builds.append((blog_directory, build_feed_type))
+
     def process(self, builds):
         for blog_directory in self.blog_directories():
             self.logger.debug('blog directory %s', blog_directory)
@@ -277,6 +374,7 @@ class BlogModule(Module):
                 self.add_context(build, blog_directory, listing, tree_listing)
 
             self.insert_dummy_builds(builds, blog_directory, tree_listing)
+            self.insert_feed_builds(builds, blog_directory, listing)
 
             # Sort the entires descending by date.
             self.sort_by_date(listing)
