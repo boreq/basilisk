@@ -20,23 +20,33 @@ logger = logging.getLogger('server')
 
 script =  """
     function basilisk() {
-        var lastCompilationTimestamp;
+        let lastCompilationTimestamp;
+
+        function scheduleReload() {
+            setTimeout(doRequest, 1000);
+        }
 
         function responseListener() {
-          var compilationTimestamp = this.response.compilationTimestamp;
+            let compilationTimestamp = this.response.compilationTimestamp;
 
-          if (lastCompilationTimestamp && compilationTimestamp !== lastCompilationTimestamp) {
-              location.reload(true);
-          }
+            if (lastCompilationTimestamp && compilationTimestamp !== lastCompilationTimestamp) {
+                location.reload(true);
+            }
 
-          lastCompilationTimestamp = compilationTimestamp;
-          setTimeout(doRequest, 1000);
+            lastCompilationTimestamp = compilationTimestamp;
+            scheduleReload();
+        }
+
+        function errorListener() {
+            console.log('Error! Is basilisk running?');
+            scheduleReload();
         }
 
         function doRequest() {
-            var request = new XMLHttpRequest();
-            request.addEventListener("load", responseListener);
-            request.open("GET", "/basilisk-status.json");
+            let request = new XMLHttpRequest();
+            request.addEventListener('load', responseListener);
+            request.addEventListener('error', errorListener);
+            request.open('GET', '/basilisk-status.json');
             request.responseType = 'json';
             request.send();
         }
