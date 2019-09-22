@@ -180,6 +180,9 @@ class BlogModule(Module):
         lines = build.read(inpath)
         content, parameters = build.parse_lines(lines)
 
+        if not parameters.get('title', None):
+            return None
+
         path = self.get_relative_path(build, blog_directory)
         relative_path = self.get_relative_path_tail(build, blog_directory)
         date = self.extract_date(build, blog_directory)
