@@ -1,0 +1,113 @@
+{
+    "pipelines": [
+        {
+            "patterns": [
+                "*.pdf",
+                "*.jpg",
+                "*.png",
+                "*.ps",
+                "*.css",
+                "*.js",
+                "*.ico",
+                "*.webm",
+                "*.asc",
+                "robots.txt"
+            ],
+            "modules": [
+                {
+                    "name": "copy"
+                }
+            ]
+        },
+        {
+            "patterns": [
+                "*.md"
+            ],
+            "modules": [
+                {
+                    "name": "pretty_urls"
+                },
+                {
+                    "name": "markdown"
+                },
+                {
+                    "name": "templates"
+                },
+                {
+                    "name": "minify_html"
+                }
+            ]
+        },
+        {
+            "patterns": [
+                "*.html"
+            ],
+            "modules": [
+                {
+                    "name": "pretty_urls"
+                },
+                {
+                    "name": "templates"
+                },
+                {
+                    "name": "minify_html"
+                }
+            ]
+        },
+        {
+            "patterns": [
+                "*.rss",
+                "*.atom"
+            ],
+            "modules": [
+            ]
+        },
+        {
+            "patterns": [
+                "*"
+            ],
+            "modules": [
+                {
+                    "name": "templates"
+                }
+            ]
+        }
+    ],
+    "modules": [
+        {
+            "name": "listing"
+        },
+        {
+            "name": "blog",
+            "config": {
+                "directories": [
+                    {
+                        "name": "thoughts",
+                        "directory": "thoughts/",
+                        "insert_dummy_builds": true,
+                        "feed": {
+                            "title": "Thoughts",
+                            "base_url": "https://example.com/",
+                            "files": {
+                                "rss": "thoughts/feed.rss",
+                                "atom": "thoughts/feed.atom"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "scripting",
+            "config": {
+                "scripts": [
+                    "${source_directory}/_scripts/build_static \"${output_directory}\""
+                ]
+            }
+        }
+    ],
+    "custom_config": {
+        "static_url": "/static/",
+        "website_name": "An example website"
+    }
+}

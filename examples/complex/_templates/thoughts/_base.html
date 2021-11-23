@@ -1,0 +1,101 @@
+{% extends "_base.html" %}
+
+{% macro article_count(amount) %}
+    {{ amount }}
+    {% if amount == 1 %}
+        entry
+    {% else %}
+        entries
+    {% endif %}
+{% endmacro %}
+
+
+{% block content %}
+    <div class="content">
+        {% if content %}
+            <article class="wrapper">
+                {{ content|safe }}
+
+                <div class="date">
+                    {{ date.year }}-{{ date.month }}-{{ date.day }}
+                </div>
+            </article>
+        {% endif %}
+
+
+        {% if not content %}
+            <div class="wrapper">
+
+                {# year view (list of months) #}
+                {% if year and not month and not day %}
+                    <ul class="items">
+                        {%- for month in blog.thoughts.tree[year] -%}
+                            {% set ns = namespace(count=0) %}
+                            {% for day in blog.thoughts.tree[year][month] %}
+                                {% set day_count = blog.thoughts.tree[year][month][day] | length %}
+                                {% set ns.count = ns.count + day_count %}
+                            {% endfor %}
+
+                            <li>
+                                <a href="{{ month }}/">{{ year }}-{{ month }}</a>
+                                <p>
+                                    {{ article_count(ns.count) }}
+                                </p>
+                            </li>
+                        {%- endfor -%}
+                    </ul>
+                {% endif %}
+
+                {# month view (list of days) #}
+                {% if year and month and not day %}
+                    <ul class="items">
+                        {%- for day in blog.thoughts.tree[year][month] -%}
+                            {% set count = blog.thoughts.tree[year][month][day] | length %}
+                            <li>
+                                <a href="{{ day }}/">{{ year }}-{{ month }}-{{ day }}</a>
+                                <p>
+                                    {{ article_count(count) }}
+                                </p>
+                            </li>
+                        {%- endfor -%}
+                    </ul>
+                {% endif %}
+
+                {# day view (list of articles) #}
+                {% if year and month and day %}
+                    <ul class="items">
+                        {%- for article in blog.thoughts.tree[year][month][day] -%}
+                            <li>
+                                <a href="{{ article.relative_path }}/">
+                                    {{ article.parameters.title }}
+                                </a>
+                                <p>{{ article.date.year }}-{{ article.date.month }}-{{ article.date.day }}</p>
+                            </li>
+                        {%- endfor -%}
+                    </ul>
+                {% endif %}
+
+                {# blog list of all articles #}
+                {% if not year and not month and not day %}
+                    <ul class="items">
+                        {%- for article in blog.thoughts.listing -%}
+                            <li>
+                                <a href="{{ article.date.year }}/{{ article.date.month }}/{{ article.date.day}}/{{ article.relative_path }}/">
+                                    {{ article.parameters.title }}
+                                </a>
+                                <p>{{ article.date.year }}-{{ article.date.month }}-{{ article.date.day }}</p>
+                            </li>
+                        {%- endfor -%}
+                    </ul>
+                {% endif %}
+
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block extra_footer %}
+    <li><a href="/thoughts/feed.atom">feed:atom</a></li>
+    <li><a href="/thoughts/feed.rss">feed:rss</a></li>
+{% endblock %}

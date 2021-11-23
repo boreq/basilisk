@@ -1,0 +1,66 @@
+{% extends "_base.html" %}
+
+{% block body_id %}body-index{% endblock %}
+
+{% block content %}
+    <div class="about">
+        <div class="wrapper">
+            {{ content|safe }}
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="wrapper">
+            <div class="columns">
+
+                <div>
+                    <div class="section-header">Projects</div>
+                    <ul class="items">
+                        {%- for name, data in current_listing.projects.content | dictsort -%}
+                            {% if data.type == 'directory' %}
+                                {% set index = data.content['index.html'].parameters %}
+                                {%- if index.featured -%}
+                                    <li>
+                                        <a href="projects/{{ name }}/">{{ index.title }}</a>
+                                        <p>{{ index.short_description }}</p>
+                                    </li>
+                                {%- endif -%}
+                            {% endif %}
+                        {%- endfor -%}
+                    </ul>
+                    <a class="section-link" href="projects/">more</a>
+                </div>
+
+                <div class="first-xs">
+                    <div class="section-header">Thoughts</div>
+                    <ul class="items">
+                        {% set article_counter = 0 %}
+                        {%- for article in blog.thoughts.listing -%}
+                            {% if loop.index0 < 5 %}
+                                <li>
+                                    <a href="thoughts/{{ article.path }}/">{{ article.parameters.title }}</a>
+                                    <p>{{ article.date.year }}-{{ article.date.month }}-{{ article.date.day }}</p>
+                                </li>
+                            {%- endif -%}
+                        {%- endfor -%}
+                    </ul>
+                    {%- if blog.thoughts.listing | length > 5 -%}
+                        <a class="section-link" href="thoughts/">more</a>
+                    {%- endif -%}
+                </div>
+
+                <div>
+                    <div class="section-header">Stuff</div>
+                    <ul class="items">
+                        <li>
+                            <a href="https://github.com/">Vim dotfiles</a>
+                            <p>a Github repository</p>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

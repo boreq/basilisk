@@ -1,0 +1,70 @@
+{% extends "_base.html" %}
+
+{% block content %}
+    <div class="about">
+        <div class="wrapper">
+            <p class="large">
+                {{ parameters.description }}
+            </p>
+
+            {% if parameters.header_image %}
+                <div class="header-image">
+                    <img src="{{ parameters.header_image }}">
+                </div>
+            {% endif %}
+
+            {% if parameters.github_link or parameters.live_version_link %}
+                <div class="project-links">
+                    {% if parameters.github_link %}
+                        <div>
+                            <a href="{{ parameters.github_link }}">see it on Github</a>
+                        </div>
+                    {% endif %}
+
+                    {% if parameters.github_link and parameters.live_version_link %}
+                        <em>or</em>
+                    {% endif %}
+
+                    {% if parameters.live_version_link %}
+                        <div>
+                            <a href="{{ parameters.live_version_link }}">see the live version</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="wrapper">
+
+            {{ content|safe }}
+
+            {% if parameters.created or parameters.updated %}
+                <div class="date">
+                    {% if parameters.created %}
+                        {{ parameters.created }}{% if parameters.updated %},{% endif %}
+                    {% endif %}
+
+                    {% if parameters.updated %}
+                        updated {{ parameters.updated }}
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {# List all files from the 'pics' subdirectory #}
+            {% if current_listing.pics and current_listing.pics.type == 'directory' %}
+                <div class="images">
+                    {%- for name, data in current_listing.pics.content | dictsort -%}
+                        {% if data.type == 'file' %}
+                            <a href="pics/{{ name }}"><img src="pics/{{ name }}"></a>
+                        {% endif %}
+                    {%- endfor -%}
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock %}
+

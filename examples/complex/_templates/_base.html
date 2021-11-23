@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <meta charset="utf-8">
+
+        <link rel="stylesheet" href="{{ config.custom_config.static_url }}css/main.css">
+        <link rel="stylesheet" href="{{ config.custom_config.static_url }}fonts/style.css">
+        <link rel="stylesheet" href="{{ config.custom_config.static_url }}fonts/fontawesome-free-5.8.1/css/all.min.css">
+
+        <title>{% block title %}{{ parameters.title or config.custom_config.website_name }}{% endblock %}</title>
+    </head>
+
+    <body id="{% block body_id %}{% endblock %}">
+            
+        <div id="site">
+            <header>
+                <div class="wrapper">
+                    <ul class="crumbs">
+                        {%- set split = directory.split('/') -%}
+                        {%- if split|length > 0 and split[0] -%}
+                            <li>
+                                <a href="{{ '../' * (split | length) }}">home</a>
+                            </li>
+                            {%- for part in split -%}
+                                {%- if part -%}
+                                    <li>
+                                        <a href="{{ '../' * (split | length - loop.index) }}">
+                                            {{ part|replace("_", " ") }}
+                                        </a>
+                                    </li>
+                                {%- endif -%}
+                            {%- endfor -%}
+                        {%- endif -%}
+                    </ul>
+                </div>
+            </header>
+
+            {% block content %}
+                <div class="content">
+                    <div class="wrapper">
+                        {{ content|safe }}
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+
+        <footer>
+            <div class="wrapper">
+                <ul>
+                    {% block extra_footer %}{% endblock %}
+                </ul>
+            </div>
+        </footer>
+    </body>
+</html>
