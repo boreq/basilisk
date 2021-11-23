@@ -160,15 +160,13 @@ class BlogModule(Module):
 
     """
 
-    config_key = 'blog'
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.created_builds = []
         self.created_feed_builds = []
 
-    def blog_directories(self):
-        directories = self.config_get('directories', [])
+    def blog_directories(self, module_config):
+        directories = self.config_get(module_config, 'directories', [])
         if len(directories) == 0:
             self.logger.warning('no blog directories defined, did you configure "blog"?')
         return directories
@@ -350,8 +348,8 @@ class BlogModule(Module):
     def register_feed_build_creation(self, blog_directory, build_feed_type):
         self.created_feed_builds.append((blog_directory, build_feed_type))
 
-    def process(self, builds):
-        for blog_directory in self.blog_directories():
+    def process(self, builds, module_config):
+        for blog_directory in self.blog_directories(module_config):
             self.logger.debug('blog directory %s', blog_directory)
 
             # Listing is a chronological listing of all blog articles starting

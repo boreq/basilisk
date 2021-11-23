@@ -7,15 +7,15 @@ def test_execute_no_mapping(builder):
     module = ExecWithModule(builder)
     build = Build('input_path/script.py', 'output_path/script.html')
     with pytest.raises(KeyError):
-        module.execute(build)
+        module.execute(build, None)
 
 
 def test_execute(builder):
-    builder.config['module_config']['exec_with'] = {
+    module_config = {
             'mapping': {
                 '*.py': 'python %s'
             }
     }
     module = ExecWithModule(builder)
     build = Build('input_path/script.py', 'output_path/script.html')
-    module.execute(build)
+    module.execute(build, module_config)

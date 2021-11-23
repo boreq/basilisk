@@ -29,21 +29,19 @@ class ManualsModule(Module):
 
     """
 
-    config_key = 'manuals'
-
     def make_processor(self, macro):
         def processor(content, *args, **kwargs):
             return troff_to_txt(content, macro)
         return processor
 
-    def get_macro(self, build):
-        for macro, patterns in self.config_get('macros', {}).items():
+    def get_macro(self, build, module_config):
+        for macro, patterns in self.config_get(module_config, 'macros', {}).items():
             for pattern in patterns:
                 if fnmatch.fnmatch(build.input_path, pattern):
                     return macro
         raise KeyError('macro not found for %s', build.input_path)
 
-    def execute(self, build):
-        macro = self.get_macro(build)
+    def execute(self, build, module_config):
+        macro = self.get_macro(build, module_config)
         processor = self.make_processor(macro)
         build.processors.append(processor)

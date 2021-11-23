@@ -21,5 +21,5 @@ def test_change_output_path(builder):
         output_path = parameter[0]
         changed_output_path = parameter[1]
         build = Build(input_path, output_path)
-        module.execute(build)
+        module.execute(build, None)
         assert build.output_path == changed_output_path

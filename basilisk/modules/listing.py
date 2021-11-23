@@ -43,7 +43,7 @@ class ListingModule(Module):
     This module doesn't require any additional configuration.
     """
 
-    def process(self, builds):
+    def process(self, builds, module_config):
         listing = {}
         for build in builds:
             parts = build.output_path.split(os.sep)

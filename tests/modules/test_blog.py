@@ -28,7 +28,7 @@ def test_preprocessing_and_postprocessing(builder):
         build.read = read
         builder.add_build(build)
 
-    builder.config['module_config']['blog'] = {
+    module_config = {
         'directories': [
             {
                 'name': 'blog_name',
@@ -41,7 +41,7 @@ def test_preprocessing_and_postprocessing(builder):
     module = BlogModule(builder)
     while builder.builds_modified:
         builder.builds_modified = False
-        module.process(iter(builder.builds))
+        module.process(iter(builder.builds), module_config)
 
     assert len(builder.builds) == len(build_paths) + len(expected_dummy_builds)
 

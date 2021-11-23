@@ -5,4 +5,4 @@ from basilisk.build import Build
 def test_execute(builder):
     module = CopyModule(builder)
     build = Build(None, None)
-    module.execute(build)
+    module.execute(build, None)

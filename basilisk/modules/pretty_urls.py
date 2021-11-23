@@ -24,7 +24,7 @@ class PrettyUrlsModule(Module):
         base_name, ext = os.path.splitext(tail)
         return (head, base_name, ext)
 
-    def execute(self, build):
+    def execute(self, build, module_config):
         head, base_name, ext = self.explode_path(build.output_path)
         if base_name != 'index':
             self.logger.debug('Changing output of %s', build)

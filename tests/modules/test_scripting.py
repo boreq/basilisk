@@ -6,24 +6,24 @@ from basilisk.build import Build
 
 def test_no_config(builder):
     module = ScriptingModule(builder)
-    module.process(None)
+    module.process(None, None)
 
 
 def test_command(builder):
-    builder.config['module_config']['scripting'] = {
+    module_config = {
         'scripts': ['echo testing']
     }
     module = ScriptingModule(builder)
-    module.process(None)
+    module.process(None, module_config)
 
 
 def test_invalid_command(builder):
-    builder.config['module_config']['scripting'] = {
+    module_config = {
         'scripts': ['invalid command']
     }
     module = ScriptingModule(builder)
     with pytest.raises(subprocess.CalledProcessError):
-        module.process(None)
+        module.process(None, module_config)
 
 
 def test_replacement(builder):

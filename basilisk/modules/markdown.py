@@ -15,7 +15,7 @@ class MarkdownModule(Module):
             return markdown.markdown(content.decode(), extensions=['tables']).encode()
         return processor
 
-    def execute(self, build):
+    def execute(self, build, module_config):
         processor = self.make_processor()
         build.processors.append(processor)
         build.output_path = replace_last_ext(build.output_path, '.html')

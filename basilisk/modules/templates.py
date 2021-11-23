@@ -41,18 +41,18 @@ class TemplatesModule(Module):
             return templates.render(input_path, template_context).encode()
         return processor
     
-    def get_templates_dir(self):
+    def get_templates_dir(self, module_config):
         default_templates_dir = '%stemplates' % self.builder.config['ignore_prefix']
-        templates_dir = self.config_get('templates_directory', default_templates_dir)
+        templates_dir = self.config_get(module_config, 'templates_directory', default_templates_dir)
         return os.path.join(self.builder.source_directory, templates_dir)
 
-    def get_templates(self):
+    def get_templates(self, module_config):
         if not hasattr(self, 'templates'):
-            templates_dir = self.get_templates_dir()
+            templates_dir = self.get_templates_dir(module_config)
             self.templates = Jinja2Templates(templates_dir)
         return self.templates
 
-    def execute(self, build):
-        templates = self.get_templates()
+    def execute(self, build, module_config):
+        templates = self.get_templates(module_config)
         processor = self.make_processor(templates, build.input_path)
         build.processors.append(processor)

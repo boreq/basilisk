@@ -23,10 +23,8 @@ class ScriptingModule(Module):
 
     """
 
-    config_key = 'scripting'
-
-    def get_scripts(self):
-        scripts = self.config_get('scripts', [])
+    def get_scripts(self, module_config):
+        scripts = self.config_get(module_config, 'scripts', [])
         if len(scripts) == 0:
             self.logger.warning('no scripts defined, did you configure "scripting"?')
         return scripts
@@ -40,8 +38,8 @@ class ScriptingModule(Module):
         r = subprocess.run(command, shell=True)
         r.check_returncode()
 
-    def process(self, builds):
-        for command in self.get_scripts():
+    def process(self, builds, module_config):
+        for command in self.get_scripts(module_config):
             command = self.replace_placeholders(command)
             self.logger.debug('Running: {}'.format(command))
             self.run_script(command)

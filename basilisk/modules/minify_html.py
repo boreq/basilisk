@@ -13,6 +13,6 @@ class MinifyHtmlModule(Module):
             return htmlmin.minify(content.decode()).encode()
         return processor
 
-    def execute(self, build):
+    def execute(self, build, module_config):
         processor = self.make_processor()
         build.processors.append(processor)

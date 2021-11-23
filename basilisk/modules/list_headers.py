@@ -65,6 +65,6 @@ class ListHeadersModule(Module):
             return content
         return processor
 
-    def execute(self, build):
+    def execute(self, build, module_config):
         processor = self.make_processor(build)
         build.processors.append(processor)

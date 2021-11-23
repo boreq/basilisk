@@ -15,7 +15,7 @@ def test_add_processor(builder):
     module = MinifyHtmlModule(builder)
     build = Build(None, None)
     assert len(build.processors) == 0
-    module.execute(build)
+    module.execute(build, None)
     assert len(build.processors) == 1
 
 

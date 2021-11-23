@@ -143,8 +143,8 @@ class Builder(object):
                     return pipeline
         return None
 
-    def iter_modules(self, module_names):
-        return iter([self.get_module(name) for name in module_names])
+    def iter_modules(self, module_definitions):
+        return iter([(self.get_module(module_definition['name']), module_definition.get('config', None)) for module_definition in module_definitions])
 
     def iter_global_modules(self):
         """Iterates over global modules defined in the config."""
@@ -186,9 +186,9 @@ class Builder(object):
                 yield build
 
     def add_build(self, build):
-        for module in self.iter_build_modules(build):
+        for (module, module_config) in self.iter_build_modules(build):
             logger.debug('Processing using %s', module)
-            module.execute(build)
+            module.execute(build, module_config)
         self.builds_modified = True
         self.builds.append(build)
 
@@ -207,9 +207,9 @@ class Builder(object):
         while self.builds_modified:
             logger.info('Processing builds')
             self.builds_modified = False
-            for module in self.with_progress_bar(self.iter_global_modules()):
+            for (module, module_config) in self.with_progress_bar(self.iter_global_modules()):
                 logger.debug('Processing using %s', module)
-                module.process(iter(self.builds))
+                module.process(iter(self.builds), module_config)
 
         logger.info('Building')
         for build in self.with_progress_bar(self.builds):

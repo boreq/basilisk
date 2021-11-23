@@ -27,7 +27,7 @@ class CopyModule(Module):
             return b''
         return read
 
-    def execute(self, build):
+    def execute(self, build, module_config):
         build.output_path = build.input_path
         method_execute = self.make_method_execute(build)
         build.execute = types.MethodType(method_execute, build)
