@@ -24,7 +24,12 @@ class ListHeadersModule(Module):
             }
         }
 
-    This module doesn't require any additional configuration.
+    Example module definition:
+
+        {
+            "name": "list_headers"
+        }
+
     """
 
     header_names = ['h{}'.format(i) for i in range(1, 7)]

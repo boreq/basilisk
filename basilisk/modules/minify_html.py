@@ -5,7 +5,12 @@ from ..module import Module
 class MinifyHtmlModule(Module):
     """Runs the content through an HTML minifier.
 
-    This module doesn't require any additional configuration.
+    Example module definition:
+
+        {
+            "name": "minify_html"
+        }
+
     """
 
     def make_processor(self):

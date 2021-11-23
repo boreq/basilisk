@@ -16,7 +16,12 @@ class PrettyUrlsModule(Module):
     In the above scenario output of 'directory_name.html' would be changed
     to 'directory_name/index.html' and outputs would overwrite each other.
 
-    This module doesn't require any additional configuration.
+    Example module definition:
+
+        {
+            "name": "pretty_urls"
+        }
+
     """
 
     def explode_path(self, path):

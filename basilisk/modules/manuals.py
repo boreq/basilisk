@@ -17,13 +17,16 @@ class ManualsModule(Module):
     should be a list of directories. All files present in those directories
     will be converted.
 
-    Example config:
+    Example module definition:
 
         {
-            "macros": {
-                "man": [
-                    "manuals/9front/1/*"
-                ]
+            "name": "manuals",
+            "config": {
+                "macros": {
+                    "man": [
+                        "manuals/9front/1/*"
+                    ]
+                }
             }
         }
 

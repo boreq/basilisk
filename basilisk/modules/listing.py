@@ -40,7 +40,12 @@ class ListingModule(Module):
     'about/index.html', the current listing provides a shortcut to view the list
     of files in that particular directory (only that file is present however).
 
-    This module doesn't require any additional configuration.
+    Example module definition:
+
+        {
+            "name": "listing"
+        }
+
     """
 
     def process(self, builds, module_config):

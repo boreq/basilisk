@@ -22,12 +22,16 @@ class TemplatesModule(Module):
         3. dir1/_base.html
         4. _base.html
 
-    Example config:
+    Example module definition:
 
         {
-            "templates_directory": "_templates"
+            "name": "templates",
+            "config": {
+                "templates_directory": "_templates"
+            }
         }
 
+    Config is optional.
     """
 
     config_key = 'templates'

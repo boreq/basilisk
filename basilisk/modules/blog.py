@@ -138,26 +138,30 @@ class BlogModule(Module):
             }
         }
 
-    Example config:
+    Example module definition:
 
         {
-            "blog_directories": [
-                {
-                    "name": "thoughts",
-                    "directory": "thoughts/",
-                    "insert_dummy_builds": true,
-                    "feed": {
-                        "title": "Thoughts",
-                        "base_url": "https://example.com/",
-                        "files": {
-                            "rss": "thoughts/feed.rss",
-                            "atom": "thoughts/feed.atom"
+            "name": "copy",
+            "config": {
+                "blog_directories": [
+                    {
+                        "name": "thoughts",
+                        "directory": "thoughts/",
+                        "insert_dummy_builds": true,
+                        "feed": {
+                            "title": "Thoughts",
+                            "base_url": "https://example.com/",
+                            "files": {
+                                "rss": "thoughts/feed.rss",
+                                "atom": "thoughts/feed.atom"
+                            }
                         }
                     }
-                }
-            ]
+                ]
+            }
         }
 
+    Config is required.
     """
 
     def __init__(self, *args, **kwargs):

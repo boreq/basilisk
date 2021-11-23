@@ -7,7 +7,12 @@ class EscapeModule(Module):
     module is useful to escape plaintext files which can contain special
     characters. 
 
-    This module doesn't require any additional configuration.
+    Example module definition:
+
+        {
+            "name": "escape"
+        }
+
     """
 
     def make_processor(self):

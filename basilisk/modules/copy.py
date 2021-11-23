@@ -9,7 +9,12 @@ class CopyModule(Module):
     most likely don't want to use any other modules in a pipline together with
     this module. Using this module should be equivalent to not defining any modules, but faster.
     
-    This module doesn't require any additional configuration.
+    Example module definition:
+
+        {
+            "name": "copy"
+        }
+
     """
 
     def make_method_execute(self, build):

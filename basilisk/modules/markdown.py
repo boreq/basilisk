@@ -7,7 +7,12 @@ class MarkdownModule(Module):
     """Runs the content of .md files through markdown converter therefore
     converting them to HTML.
 
-    This module doesn't require any additional configuration.
+    Example module definition:
+
+        {
+            "name": "markdown"
+        }
+
     """
 
     def make_processor(self):

@@ -9,12 +9,15 @@ class ExecWithModule(Module):
     """Executes specified executable files using the defined commands to
     produce the input instead of just reading them.
 
-    Example config:
+    Example module definition:
 
         {
-            "mapping": {
-                "*.py": "python %s",
-                "*.sh": "bash %s"
+            "name": "list_headers",
+            "config": {
+                "mapping": {
+                    "*.py": "python %s",
+                    "*.sh": "bash %s"
+                }
             }
         }
 

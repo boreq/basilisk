@@ -12,15 +12,19 @@ class ScriptingModule(Module):
     compiling the actual project every time you run `basilisk build` or
     `basilisk serve`.
 
-    Example config:
+    Example module definition:
 
         {
-            "scripts": [
-                "./path_to_your_script.sh",
-                "./script.sh ${source_directory} ${output_directory}"
-            ]
+            "name": "scripting",
+            "config": {
+                "scripts": [
+                    "./path_to_your_script.sh",
+                    "./script.sh ${source_directory} ${output_directory}"
+                ]
+            }
         }
 
+    Config is required.
     """
 
     def get_scripts(self, module_config):
