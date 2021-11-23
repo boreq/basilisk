@@ -18,7 +18,8 @@ setup(
         'beautifulsoup4',
         'flask',
         'python-slugify',
-        'feedgen'
+        'feedgen',
+        'pillow'
     ],
     entry_points='''
         [console_scripts]
