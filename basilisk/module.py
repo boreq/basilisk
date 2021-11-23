@@ -4,9 +4,14 @@ _sentinel = object()
 class Module(object):
     """Base module class."""
 
-    def __init__(self):
+    def __init__(self, builder):
+        """Modules are instantiated in the builder.
+
+        builder: a Builder object.
+        """
         self._logger_name = self.__class__.__name__
         self._logger = None
+        self.builder = builder
 
     def __str__(self):
         return self.__class__.__name__
@@ -43,13 +48,6 @@ class Module(object):
             return default
 
         raise KeyError
-
-    def load(self, builder):
-        """Called when the module is loaded in the builder.
-
-        builder: a Builder object.
-        """
-        self.builder = builder
 
     def process(self, builds):
         """Process builds using this module. This method can be called multiple

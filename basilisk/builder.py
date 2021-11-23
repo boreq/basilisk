@@ -122,9 +122,7 @@ class Builder(object):
         except:
             # TODO: try load an external module.
             raise
-        module = module_class()
-        module.load(self)
-        return module
+        return module_class(self)
 
     def get_module(self, module_name):
         """Retrieves a single module from cache or loads it.
