@@ -7,7 +7,7 @@ from ..module import Module
 class CopyModule(Module):
     """Copies the files in the pipeline without modifying them in any way. You
     most likely don't want to use any other modules in a pipline together with
-    this module. Using this module should be equivalent to not defining any modules, but faster.
+    this module.
     
     Example module definition:
 
