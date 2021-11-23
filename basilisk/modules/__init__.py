@@ -36,3 +36,6 @@ templates = _TemplatesModule
 
 from .resize import ResizeModule as _ResizeModule
 resize = _ResizeModule
+
+from .lazy_load_images import LazyLoadImagesModule as _LazyLoadImagesModule
+lazy_load_images = _LazyLoadImagesModule
