@@ -4,8 +4,7 @@ from basilisk.build import Build
 
 
 def test_add_processor_missing_config(builder):
-    module = ManualsModule()
-    module.builder = builder
+    module = ManualsModule(builder)
     build = Build(None, None)
     assert len(build.processors) == 0
     with pytest.raises(KeyError):
@@ -20,8 +19,7 @@ def test_add_processor(builder):
                 ]
             }
     }
-    module = ManualsModule()
-    module.builder = builder
+    module = ManualsModule(builder)
     build = Build('input_path', 'output_path')
     assert len(build.processors) == 0
     module.execute(build)

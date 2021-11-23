@@ -35,10 +35,10 @@ class TemplatesModule(Module):
     def make_processor(self, templates, input_path):
         def processor(content, context):
             template_context = {
-                'content': content,
+                'content': content.decode(),
             }
             template_context.update(context)
-            return templates.render(input_path, template_context)
+            return templates.render(input_path, template_context).encode()
         return processor
     
     def get_templates_dir(self):

@@ -24,7 +24,7 @@ def test_preprocessing_and_postprocessing(builder):
     for path in build_paths:
         build = Build(path, path)
         def read(*args, **kwargs):
-            return ''
+            return b''
         build.read = read
         builder.add_build(build)
 
@@ -38,8 +38,7 @@ def test_preprocessing_and_postprocessing(builder):
         ]
     }
 
-    module = BlogModule()
-    module.builder = builder
+    module = BlogModule(builder)
     while builder.builds_modified:
         builder.builds_modified = False
         module.process(iter(builder.builds))

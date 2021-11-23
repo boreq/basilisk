@@ -4,8 +4,7 @@ from basilisk.build import Build
 
 
 def test_execute_no_mapping(builder):
-    module = ExecWithModule()
-    module.builder = builder
+    module = ExecWithModule(builder)
     build = Build('input_path/script.py', 'output_path/script.html')
     with pytest.raises(KeyError):
         module.execute(build)
@@ -17,7 +16,6 @@ def test_execute(builder):
                 '*.py': 'python %s'
             }
     }
-    module = ExecWithModule()
-    module.builder = builder
+    module = ExecWithModule(builder)
     build = Build('input_path/script.py', 'output_path/script.html')
     module.execute(build)

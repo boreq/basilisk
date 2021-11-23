@@ -5,7 +5,7 @@ import tqdm
 from .build import Build
 from .config import Config
 from .exceptions import BuildException
-from .helpers import replace_ext, import_by_name, remove_directory_contents
+from .helpers import import_by_name, remove_directory_contents
 
 
 logger = logging.getLogger('builder')
@@ -168,8 +168,7 @@ class Builder(object):
     def builds_generator(self):
         """Yields initial Build objects. All files in the source directory are
         scanned. For each file a build object is created and the output path is
-        set to the relative path in the source directory with the extension
-        changed to '.html'.
+        set to the relative path in the source directory.
         """
         base_path_length = len(self.source_directory) + 1
 
@@ -180,8 +179,7 @@ class Builder(object):
                 if not self.should_build(input_path):
                     continue
 
-                ext = os.path.splitext(input_path)[1]
-                output_path = replace_ext(input_path, ext, '.html')
+                output_path = input_path
 
                 build = Build(input_path, output_path)
                 logger.debug('Yielding object: %s', build)

@@ -9,6 +9,14 @@ def replace_ext(path, old, new):
     else:
         return path + new
 
+def replace_last_ext(path, new):
+    """Replaces extension in the path from old to new."""
+    old = os.path.splitext(path)[1]
+    if old:
+        return path[:-len(old)] + new
+    else:
+        return path + new
+
 
 def import_by_name(name):
     """Imports an object from a module. For example if passed name is

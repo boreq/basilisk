@@ -1,5 +1,6 @@
 import markdown
 from ..module import Module
+from ..helpers import replace_last_ext
 
 
 class MarkdownModule(Module):
@@ -11,9 +12,10 @@ class MarkdownModule(Module):
 
     def make_processor(self):
         def processor(content, *args, **kwargs):
-            return markdown.markdown(content, extensions=['tables'])
+            return markdown.markdown(content.decode(), extensions=['tables']).encode()
         return processor
 
     def execute(self, build):
         processor = self.make_processor()
         build.processors.append(processor)
+        build.output_path = replace_last_ext(build.output_path, '.html')

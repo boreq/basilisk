@@ -28,11 +28,11 @@ class DummyBuild(Build):
 
     def read(self, path):
         if self.day:
-            return ['title: {}'.format(self.day)]
+            return 'title: {}'.format(self.day).encode('utf-8')
         if self.month:
-            return ['title: {}'.format(self.month)]
+            return 'title: {}'.format(self.month).encode('utf-8')
         if self.year:
-            return ['title: {}'.format(self.year)]
+            return 'title: {}'.format(self.year).encode('utf-8')
 
 
 class FeedBuild(Build):
@@ -73,7 +73,7 @@ class FeedBuild(Build):
         )
 
     def read(self, path):
-        return self.get_str().decode('utf-8').splitlines(True)
+        return self.get_str()
 
 
 class RssBuild(FeedBuild):
@@ -177,8 +177,8 @@ class BlogModule(Module):
         # Here we have to cheat a little to get the params by reading the
         # file at this point.
         inpath = os.path.join(self.builder.source_directory, build.input_path)
-        lines = build.read(inpath)
-        content, parameters = build.parse_lines(lines)
+        b = build.read(inpath)
+        content, parameters = build.extract_parameters(b)
 
         if not parameters.get('title', None):
             return None

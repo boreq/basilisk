@@ -33,3 +33,6 @@ scripting = _ScriptingModule
 
 from .templates import TemplatesModule as _TemplatesModule
 templates = _TemplatesModule
+
+from .resize import ResizeModule as _ResizeModule
+resize = _ResizeModule

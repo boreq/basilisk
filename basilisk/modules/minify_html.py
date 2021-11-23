@@ -10,7 +10,7 @@ class MinifyHtmlModule(Module):
 
     def make_processor(self):
         def processor(content, *args, **kwargs):
-            return htmlmin.minify(content)
+            return htmlmin.minify(content.decode()).encode()
         return processor
 
     def execute(self, build):

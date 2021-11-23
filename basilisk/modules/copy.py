@@ -7,7 +7,7 @@ from ..module import Module
 class CopyModule(Module):
     """Copies the files in the pipeline without modifying them in any way. You
     most likely don't want to use any other modules in a pipline together with
-    this module.
+    this module. Using this module should be equivalent to not defining any modules, but faster.
     
     This module doesn't require any additional configuration.
     """
@@ -24,7 +24,7 @@ class CopyModule(Module):
 
     def make_method_read(self):
         def read(self, *args, **kwargs):
-            return []
+            return b''
         return read
 
     def execute(self, build):

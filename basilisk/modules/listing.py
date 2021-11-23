@@ -59,8 +59,8 @@ class ListingModule(Module):
             # Here we have to cheat a little to get the params by reading the
             # file at this point.
             inpath = os.path.join(self.builder.source_directory, build.input_path)
-            lines = build.read(inpath)
-            content, parameters = build.parse_lines(lines)
+            b = build.read(inpath)
+            _, parameters = build.extract_parameters(b)
 
             current[parts[-1]] = {
                 'type': 'file',

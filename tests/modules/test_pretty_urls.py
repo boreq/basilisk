@@ -14,8 +14,8 @@ test_parameters = [
 ]
 
 
-def test_change_output_path():
-    module = PrettyUrlsModule()
+def test_change_output_path(builder):
+    module = PrettyUrlsModule(builder)
     for parameter in test_parameters:
         input_path = None
         output_path = parameter[0]
