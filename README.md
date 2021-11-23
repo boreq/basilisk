@@ -12,4 +12,8 @@ installation was successful execute the following commands:
 # Usage
 To build the example execute the following command:
 
-    basilisk build examples/basic output
+    $ basilisk build examples/basic output
+
+You can also use the development server:
+
+    $ basilisk serve examples/basic
