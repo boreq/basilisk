@@ -1,4 +1,3 @@
-import logging
 import os
 from .exceptions import TemplateRenderException
 from .helpers import replace_ext

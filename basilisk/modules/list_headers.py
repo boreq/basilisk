@@ -1,6 +1,5 @@
 import slugify
 import bs4
-import markdown
 from ..module import Module
 
 

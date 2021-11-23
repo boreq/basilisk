@@ -1,4 +1,3 @@
-import htmlmin
 from ..module import Module
 from bs4 import BeautifulSoup
 

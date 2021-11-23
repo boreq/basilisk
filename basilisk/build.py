@@ -55,7 +55,7 @@ class Build(object):
         """
         try:
             lines = content.decode().splitlines(True)
-        except UnicodeDecodeError as e:
+        except UnicodeDecodeError:
             return content, {}
 
         parameters = {}
