@@ -1,0 +1,22 @@
+{% extends "_base.html" %}
+
+{% block content %}
+    <h1>Welcome.</h1>
+    <p>
+        This part of the text is here because the index page uses a special
+        template.
+    </p>
+    <p>
+        Try those links to subpages generated with the blog module:
+        <ul>
+            {%- for article in blog.posts.listing -%}
+                <li>
+                    <a href="posts/{{ article.path }}">
+                        "{{ article.parameters.title }}", posted on {{ article.date.year }} - {{ article.date.month }} - {{ article.date.day }}
+                    </a>
+                </li>
+            {%- endfor -%}
+        </ul>
+    </p>
+    {{ content }}
+{% endblock%}

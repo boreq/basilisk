@@ -33,6 +33,18 @@
     "modules": [
         {
             "name": "listing"
+        },
+        {
+            "name": "blog",
+            "config": {
+                "directories": [
+                    {
+                        "name": "posts",
+                        "directory": "posts/",
+                        "insert_dummy_builds": true
+                    }
+                ]
+            }
         }
     ]
 }
