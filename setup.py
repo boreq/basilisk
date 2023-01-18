@@ -16,7 +16,7 @@ setup(
         'htmlmin',
         'watchdog',
         'beautifulsoup4',
-        'flask',
+        'flask==2.0',
         'python-slugify',
         'feedgen',
         'pillow'
