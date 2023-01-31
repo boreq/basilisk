@@ -44,7 +44,8 @@ def build(ctx, source_directory, output_directory, progress):
 @click.pass_context
 @click.option('--host', type=str)
 @click.option('--port', type=int)
-def serve(ctx, source_directory, host, port):
+@click.option('--progress/--no-progress', default=False)
+def serve(ctx, source_directory, host, port, progress):
     """Builds and serves your website, rebuilding on file changes."""
     kwargs = {}
     if host is not None:
@@ -52,7 +53,7 @@ def serve(ctx, source_directory, host, port):
     if port is not None:
         kwargs['port'] = port
     try:
-        server = Server(source_directory, **kwargs)
+        server = Server(source_directory, progress=progress, **kwargs)
         server.run()
     except Exception as e:
         logger.critical(e)

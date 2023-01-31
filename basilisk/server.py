@@ -203,11 +203,11 @@ class Server(object):
     # How much time should pass without new events for the compiltion to start?
     event_debounce = 1 # [seconds]
 
-    def __init__(self, source_directory, host='localhost', port=8080):
+    def __init__(self, source_directory, host='localhost', port=8080, progress=False):
         self.source_directory = source_directory
         self.host = host
         self.port = port
-
+        self.progress = progress
 
     def run(self):
         text = 'Starting development server on http://{}:{}'.format(self.host, self.port)
@@ -256,7 +256,7 @@ class Server(object):
     def compile(self, tmp_directory, status):
         try:
             remove_directory_contents(tmp_directory)
-            builder = Builder(self.source_directory, tmp_directory)
+            builder = Builder(self.source_directory, tmp_directory, progress=self.progress)
             builder.run()
             status['compilationTimestamp'] = time.time()
             logger.info('Compiled!')
