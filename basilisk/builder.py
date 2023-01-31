@@ -193,7 +193,7 @@ class Builder(object):
         self.builds.append(build)
 
     def with_progress_bar(self, iterable):
-        return tqdm.tqdm(iterable, disable=not self.progress, leave=False)
+        return tqdm.tqdm(iterable, disable=not self.progress, leave=False, miniters=1)
 
     def run(self):
         """This is the main function which should be executed to run a build."""
