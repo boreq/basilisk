@@ -3,7 +3,7 @@ import datetime
 import urllib
 from ..module import Module
 from ..build import Build
-from feedgen.feed import FeedGenerator
+from feedgen.feed import FeedGenerator # type: ignore
 
 
 class DummyBuild(Build):

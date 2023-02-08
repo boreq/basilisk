@@ -2,10 +2,12 @@ import logging
 import os
 import fnmatch
 import tqdm
+import concurrent.futures
 from .build import Build
 from .config import Config
 from .exceptions import BuildException
 from .helpers import import_by_name, remove_directory_contents
+from .cache import Cache
 
 
 logger = logging.getLogger('builder')
@@ -60,6 +62,8 @@ class Builder(object):
         self.ignored = []
 
         self.module_cache = {}
+
+        self.build_cache = Cache(self.config, self.source_directory, self.output_directory)
 
         self.init_ignored()
 
@@ -192,8 +196,8 @@ class Builder(object):
         self.builds_modified = True
         self.builds.append(build)
 
-    def with_progress_bar(self, iterable):
-        return tqdm.tqdm(iterable, disable=not self.progress, leave=False, miniters=1)
+    def progress_bar(self, *args, **kwargs):
+        return tqdm.tqdm(*args, disable=not self.progress, leave=False, miniters=1, **kwargs)
 
     def run(self):
         """This is the main function which should be executed to run a build."""
@@ -207,11 +211,25 @@ class Builder(object):
         while self.builds_modified:
             logger.info('Processing builds')
             self.builds_modified = False
-            for (module, module_config) in self.with_progress_bar(self.iter_global_modules()):
+            for (module, module_config) in self.progress_bar(self.iter_global_modules()):
                 logger.debug('Processing using %s', module)
                 module.process(iter(self.builds), module_config)
 
         logger.info('Building')
-        for build in self.with_progress_bar(self.builds):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            with self.progress_bar(total=len(self.builds)) as build_progress_bar:
+                futures = [executor.submit(self.execute, build) for build in self.builds]
+                for future in concurrent.futures.as_completed(futures):
+                    build_progress_bar.update(1)
+
+        self.build_cache.cleanup()
+
+    def execute(self, build):
+        logger.debug('Considering %s', build)
+        cached_build = self.build_cache.get(build)
+        if cached_build is not None:
+            build.write(self.output_directory, cached_build)
+        else:
             logger.debug('Building %s', build)
             build.execute(self.config, self.source_directory, self.output_directory)
+            self.build_cache.put(build)

@@ -1,4 +1,4 @@
-import htmlmin
+import htmlmin # type: ignore
 from ..module import Module
 
 

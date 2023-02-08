@@ -19,8 +19,23 @@ setup(
         'flask==2.0',
         'python-slugify',
         'feedgen',
-        'pillow'
+        'pillow',
+        'appdirs==1.4',
     ],
+    extras_require={
+        'dev': [
+            'pyflakes',
+            'pytest',
+            'mypy==1.0',
+            'types-appdirs',
+            'types-pillow',
+            'types-Markdown',
+            'types-python-slugify',
+            'types-beautifulsoup4',
+            'types-tqdm',
+            'types-babel',
+        ],
+    },
     entry_points='''
         [console_scripts]
         basilisk=basilisk.cli:cli
