@@ -31,6 +31,7 @@ class Cache(object):
         content = build.read(inpath)
 
         m = hashlib.sha256()
+        m.update(inpath.encode('utf-8'))
         m.update(content)
         m.update(pickle.dumps(self.config))
         m.update(pickle.dumps(build.additional_context))
@@ -52,7 +53,7 @@ class CacheStorage(object):
             return None
 
     def put(self, h: bytes, file_path: str) -> None:
-        os.makedirs(self.cache_directory, mode=0o700, exist_ok=True)
+        os.makedirs(self.cache_directory, exist_ok=True)
         target_file_path = os.path.join(self.cache_directory, h.hex())
         shutil.copyfile(file_path, target_file_path)
 

@@ -27,14 +27,7 @@ class CopyModule(Module):
             shutil.copyfile(inpath, outpath)
         return execute
 
-    def make_method_read(self):
-        def read(self, *args, **kwargs):
-            return b''
-        return read
-
     def execute(self, build, module_config):
         build.output_path = build.input_path
         method_execute = self.make_method_execute(build)
         build.execute = types.MethodType(method_execute, build)
-        method_read = self.make_method_read()
-        build.read = types.MethodType(method_read, build)

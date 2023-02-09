@@ -220,6 +220,9 @@ class Builder(object):
             with self.progress_bar(total=len(self.builds)) as build_progress_bar:
                 futures = [executor.submit(self.execute, build) for build in self.builds]
                 for future in concurrent.futures.as_completed(futures):
+                    e = future.exception()
+                    if e is not None:
+                        raise e
                     build_progress_bar.update(1)
 
         self.build_cache.cleanup()
@@ -228,6 +231,7 @@ class Builder(object):
         logger.debug('Considering %s', build)
         cached_build = self.build_cache.get(build)
         if cached_build is not None:
+            logger.debug("Cached %s", build)
             build.write(self.output_directory, cached_build)
         else:
             logger.debug('Building %s', build)

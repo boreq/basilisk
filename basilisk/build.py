@@ -101,8 +101,7 @@ class Build(object):
         """
         path = os.path.join(output_directory, self.output_path)
         directory = os.path.dirname(path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
         with open(path, 'wb') as f:
             f.write(content)
 
