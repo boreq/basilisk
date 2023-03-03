@@ -52,7 +52,10 @@ class ResizeModule(Module):
                     target_size = self.get_target_size(module_config, image)
                     resized_image = image.resize(target_size, Image.LANCZOS)
                     with io.BytesIO() as output:
-                        resized_image.save(output, fmt, exif=image.info['exif'])
+                        kwargs = {}
+                        if image.info.get('exif', None) is not None:
+                            kwargs['exif'] = image.info['exif']
+                        resized_image.save(output, fmt, **kwargs)
                         return output.getvalue()
         return processor
 
