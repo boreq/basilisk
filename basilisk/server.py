@@ -178,7 +178,16 @@ class EventHandler(FileSystemEventHandler):
     def __init__(self):
         self.received_event = threading.Event()
 
-    def on_any_event(self, event):
+    def on_created(self, event):
+        self.received_event.set()
+
+    def on_modified(self, event):
+        self.received_event.set()
+
+    def on_deleted(self, event):
+        self.received_event.set()
+
+    def on_moved(self, event):
         self.received_event.set()
 
 
