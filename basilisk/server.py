@@ -209,7 +209,7 @@ class Server(object):
     # How often should the loop check if a new event arrived?
     event_timeout = 0.5 # [seconds]
 
-    # How much time should pass without new events for the compiltion to start?
+    # How much time should pass without new events for the compilation to start?
     event_debounce = 1 # [seconds]
 
     def __init__(self, source_directory, host='localhost', port=8080, progress=False):
