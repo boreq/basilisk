@@ -191,7 +191,7 @@ class Builder(object):
 
     def add_build(self, build):
         for (module, module_config) in self.iter_build_modules(build):
-            logger.debug('Processing using %s', module)
+            logger.debug('Executing module %s', module)
             module.execute(build, module_config)
         self.builds_modified = True
         self.builds.append(build)
@@ -228,12 +228,14 @@ class Builder(object):
         self.build_cache.cleanup()
 
     def execute(self, build):
-        logger.debug('Considering %s', build)
         cached_build = self.build_cache.get(build)
         if cached_build is not None:
             logger.debug("Cached %s", build)
             build.write(self.output_directory, cached_build)
         else:
             logger.debug('Building %s', build)
-            build.execute(self.config, self.source_directory, self.output_directory)
+            try:
+                build.execute(self.config, self.source_directory, self.output_directory)
+            except Exception as e:
+                raise Exception('error building: {}'.format(build)) from e
             self.build_cache.put(build)
