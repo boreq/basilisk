@@ -22,8 +22,7 @@ class CopyModule(Module):
             inpath = os.path.join(source_directory, build.input_path)
             outpath = os.path.join(output_directory, build.output_path)
             outdir = os.path.dirname(outpath)
-            if not os.path.exists(outdir):
-                os.makedirs(outdir)
+            os.makedirs(outdir, exist_ok=True)
             shutil.copyfile(inpath, outpath)
         return execute
 
