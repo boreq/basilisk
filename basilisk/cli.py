@@ -21,6 +21,8 @@ def cli(ctx, debug):
     log_format = (debug and DEBUG_LOG_FORMAT) or LOG_FORMAT
     log_level = (debug and logging.DEBUG) or logging.INFO
     logging.basicConfig(format=log_format, level=log_level)
+    for handler in logging.root.handlers:
+        handler.addFilter(BasiliskFilter())
 
 
 @cli.command()
@@ -91,3 +93,8 @@ def list_modules():
 
     for name in sorted(found_modules):
         print('{name}'.format(name=name))
+
+
+class BasiliskFilter(logging.Filter):
+    def filter(self, record):
+        return not record.name.startswith('watchdog.observers')
