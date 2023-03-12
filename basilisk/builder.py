@@ -1,4 +1,3 @@
-import logging
 import os
 import fnmatch
 import tqdm
@@ -8,6 +7,7 @@ from .config import Config
 from .exceptions import BuildException
 from .helpers import import_by_name, remove_directory_contents
 from .cache import Cache
+from . import logging
 
 
 logger = logging.getLogger('builder')

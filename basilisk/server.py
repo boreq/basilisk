@@ -1,6 +1,5 @@
 import threading
 import tempfile
-import logging
 import datetime
 import io
 import bs4
@@ -13,6 +12,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from .builder import Builder
 from .helpers import remove_directory_contents
+from . import logging
 
 
 logger = logging.getLogger('server')

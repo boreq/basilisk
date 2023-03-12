@@ -3,11 +3,12 @@ import logging
 from .builder import Builder
 from .server import Server
 from .helpers import import_by_name
+from . import logging as basilisklogging
 
 
 LOG_FORMAT = '%(levelname)s: %(message)s'
 DEBUG_LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s: %(message)s'
-logger = logging.getLogger('cli')
+logger = basilisklogging.getLogger('cli')
 
 
 @click.group()
@@ -22,7 +23,7 @@ def cli(ctx, debug):
     log_level = (debug and logging.DEBUG) or logging.INFO
     logging.basicConfig(format=log_format, level=log_level)
     for handler in logging.root.handlers:
-        handler.addFilter(BasiliskFilter())
+        handler.addFilter(basilisklogging.BasiliskFilter())
 
 
 @cli.command()
@@ -93,8 +94,3 @@ def list_modules():
 
     for name in sorted(found_modules):
         print('{name}'.format(name=name))
-
-
-class BasiliskFilter(logging.Filter):
-    def filter(self, record):
-        return not record.name.startswith('watchdog.observers')

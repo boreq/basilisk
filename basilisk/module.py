@@ -31,7 +31,7 @@ class Module(object):
     def logger(self):
         """Use this logger to log messages in the module."""
         if not self._logger:
-            import logging
+            from . import logging
             self._logger = logging.getLogger(self._logger_name)
         return self._logger
 

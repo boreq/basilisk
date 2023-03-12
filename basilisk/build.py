@@ -1,5 +1,5 @@
-import logging
 import os
+from . import logging
 
 
 logger = logging.getLogger('build')
