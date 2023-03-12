@@ -56,7 +56,14 @@ class TemplatesModule(Module):
             self.templates = Jinja2Templates(templates_dir)
         return self.templates
 
+    def template_context_obj(self, path):
+        return {
+                'path': path,
+                'modified': os.path.getmtime(path),
+        }
+
     def execute(self, build, module_config):
         templates = self.get_templates(module_config)
         processor = self.make_processor(templates, build.input_path)
         build.processors.append(processor)
+        build.additional_context['templates'] = [self.template_context_obj(path) for path in templates.list_templates()]

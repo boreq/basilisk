@@ -53,6 +53,12 @@ class BaseTemplates(object):
         """
         raise NotImplementedError
 
+    def list_templates(self):
+        """This method returns a list of paths to all templates that may be
+        used during rendering.
+        """
+        raise NotImplementedError
+
     def render(self, path, context):
         """Called during the build to render templates.
 
@@ -74,6 +80,9 @@ class Jinja2Templates(BaseTemplates):
         import jinja2
         loader = jinja2.FileSystemLoader(self.template_directory)
         self.env = jinja2.Environment(loader=loader, extensions=extensions)
+
+    def list_templates(self):
+        return [os.path.join(self.template_directory, path) for path in self.env.list_templates()]
 
     def _render_template(self, path, context):
         template = self.env.get_template(path)
