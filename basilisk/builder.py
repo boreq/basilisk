@@ -213,7 +213,7 @@ class Builder(object):
             self.builds_modified = False
             for (module, module_config) in self.progress_bar(self.iter_global_modules()):
                 logger.debug('Processing using %s', module)
-                module.process(iter(self.builds), module_config)
+                module.process(self.builds, module_config)
 
         logger.info('Building')
         with concurrent.futures.ThreadPoolExecutor() as executor:
