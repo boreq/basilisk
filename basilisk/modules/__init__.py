@@ -39,3 +39,6 @@ resize = _ResizeModule
 
 from .lazy_load_images import LazyLoadImagesModule as _LazyLoadImagesModule
 lazy_load_images = _LazyLoadImagesModule
+
+from .convert import ConvertModule as _ConvertModule
+convert = _ConvertModule
