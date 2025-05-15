@@ -1,6 +1,8 @@
 import os
 import io
 import subprocess
+import tempfile
+import pathlib
 from ..module import Module
 from PIL import Image
 
@@ -136,30 +138,34 @@ class VideoResizerProcessorBuilder:
 
     @staticmethod
     def _resize(build, content, target_width, target_height):
-        ext = os.path.splitext(build.input_path)[1].lower()
-        ext = ext.lstrip('.')
+        with tempfile.TemporaryDirectory() as directory:
+            input_name = pathlib.Path(build.input_path).name
+            output_name = pathlib.Path(build.output_path).name
+            path_in = os.path.join(directory, input_name)
+            path_out = os.path.join(directory, "output_{}".format(output_name))
 
-        result = subprocess.run(
-            [
-                'ffmpeg',
-                '-f',
-                ext,
-                '-i',
-                'pipe:',
-                '-filter:v',
-                'scale={}:{}'.format(target_width, target_height),
-                '-f',
-                ext,
-                'pipe:',
-            ],
-            input=content,
-            capture_output=True,
-        )
+            with open(path_in, 'wb') as f:
+                f.write(content)
 
-        if result.returncode != 0:
-            raise Exception('ffmpeg error: {}'.format(result.stderr))
+            result = subprocess.run(
+                [
+                    'ffmpeg',
+                    '-i',
+                    path_in,
+                    '-filter:v',
+                    'scale={}:{}'.format(target_width, target_height),
+                    path_out,
+                ],
+                capture_output=True,
+            )
 
-        return result.stdout
+            if result.returncode != 0:
+                raise Exception('ffmpeg error: {}'.format(result.stderr))
+
+            with open(path_out, 'rb') as f:
+                content = f.read()
+
+        return content
 
     @staticmethod
     def make_processor(module, build, module_config):
