@@ -29,7 +29,7 @@ class ResizeModule(Module):
         if ext in ['.jpg', '.jpeg', '.png']:
             return ImageResizerProcessorBuilder.make_processor(self, build, module_config)
 
-        if ext in ['.webm']:
+        if ext in ['.webm', '.mp4']:
             return VideoResizerProcessorBuilder.make_processor(self, build, module_config)
 
         raise Exception('resize module doesn\'t support files with extension \'{}\''.format(ext))
