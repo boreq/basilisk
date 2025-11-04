@@ -42,7 +42,7 @@ class ManualsModule(Module):
             for pattern in patterns:
                 if fnmatch.fnmatch(build.input_path, pattern):
                     return macro
-        raise KeyError('macro not found for %s', build.input_path)
+        raise KeyError(f'macro not found for {build.input_path}')
 
     def execute(self, build, module_config):
         macro = self.get_macro(build, module_config)
