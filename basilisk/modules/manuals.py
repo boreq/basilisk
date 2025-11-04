@@ -4,7 +4,7 @@ from ..module import Module
 
 
 def troff_to_txt(text, macro='man'):
-    command = 'nroff -P-c -%s' % macro
+    command = 'nroff -P-c -%s | col -bx' % macro
     r = subprocess.check_output(command, shell=True, input=text, universal_newlines=True)
     return r
 
