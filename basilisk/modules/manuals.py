@@ -34,7 +34,7 @@ class ManualsModule(Module):
 
     def make_processor(self, macro):
         def processor(content, *args, **kwargs):
-            return troff_to_txt(content, macro)
+            return troff_to_txt(content.decode(), macro).encode()
         return processor
 
     def get_macro(self, build, module_config):
