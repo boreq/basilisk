@@ -42,3 +42,6 @@ lazy_load_images = _LazyLoadImagesModule
 
 from .convert import ConvertModule as _ConvertModule
 convert = _ConvertModule
+
+from .change_extension import ChangeExtensionModule as _ChangeExtensionModule
+change_extension = _ChangeExtensionModule
