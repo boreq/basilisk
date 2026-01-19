@@ -7,7 +7,7 @@ import time
 import flask
 import os
 import traceback
-from werkzeug import serving
+from werkzeug import serving, utils
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from .builder import Builder
@@ -147,13 +147,13 @@ def create_app(directory_path, status):
     @app.route('/<path:path>')
     @nocache
     def route_file(path):
-        path = flask.safe_join(directory_path, path)
+        path = utils.safe_join(directory_path, path)
         for file_path in iter_file_paths(path):
             if os.path.exists(file_path):
                 f = open(file_path, 'rb')
                 if f.name.endswith('.html') or f.name.endswith('.htm'):
                     f = inject_script(f)
-                return flask.send_file(f, attachment_filename=file_path)
+                return flask.send_file(f, download_name=file_path)
 
         logger.warning('Server: file not found: {}'.format(path))
         flask.abort(404)
